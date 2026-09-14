@@ -1,13 +1,13 @@
 FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY apps/web/package.json apps/web/package-lock.json ./
+RUN npm install
 
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY apps/web/ .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
