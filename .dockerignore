@@ -1,7 +1,0 @@
-node_modules
-apps/web/node_modules
-apps/web/.next
-.next
-.git
-docker
-*.md
