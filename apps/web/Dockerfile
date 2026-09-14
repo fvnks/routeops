@@ -25,7 +25,7 @@ ENV PORT=3000
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat curl
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -33,12 +33,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-
-COPY docker-entrypoint.sh ./docker-entrypoint.sh
-RUN chmod +x ./docker-entrypoint.sh
+COPY --from=builder /app/package.json ./package.json
 
 USER nextjs
 
 EXPOSE 3000
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD curl -f http://localhost:3000/ || exit 1
+
+CMD ["sh", "-c", "npx prisma db push --skip-generate 2>&1 || true; exec node server.js"]
