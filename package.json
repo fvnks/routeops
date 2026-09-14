@@ -1,0 +1,19 @@
+{
+  "name": "routeops",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "db:generate": "cd apps/web && npx prisma generate",
+    "db:push": "cd apps/web && npx prisma db push",
+    "db:migrate": "cd apps/web && npx prisma migrate dev",
+    "db:migrate:prod": "cd apps/web && npx prisma migrate deploy",
+    "db:seed": "cd apps/web && npx tsx prisma/seed.ts",
+    "db:studio": "cd apps/web && npx prisma studio"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  },
+  "packageManager": "npm@10.0.0"
+}
