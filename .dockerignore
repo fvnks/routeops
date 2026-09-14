@@ -3,9 +3,5 @@ apps/web/node_modules
 apps/web/.next
 .next
 .git
-.env
-.env.local
-.env.*
 docker
-packages
 *.md

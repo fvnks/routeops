@@ -12,6 +12,8 @@ RUN npx prisma generate
 
 COPY apps/web/ .
 
+RUN chmod +x ./docker-entrypoint.sh
+
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
@@ -20,4 +22,4 @@ RUN npm run build
 EXPOSE 3000
 ENV PORT=3000
 
-CMD ["sh", "-c", "npx prisma db push --skip-generate && node server.js"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
