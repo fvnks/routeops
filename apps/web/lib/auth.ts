@@ -44,6 +44,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
+          permissions: user.permissions,
         };
       },
     }),
@@ -56,10 +57,12 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === "authentik" && user) {
         token.id = user.id;
         token.role = "ADMIN";
+        token.permissions = []; // Admin has access to everything
       }
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
+        token.permissions = (user as any).permissions || [];
       }
       return token;
     },
@@ -67,6 +70,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
+        (session.user as any).permissions = token.permissions || [];
       }
       return session;
     },
@@ -83,6 +87,7 @@ export const authOptions: NextAuthOptions = {
               name: user.name || user.email,
               passwordHash: "",
               role: "ADMIN",
+              permissions: [],
             },
           });
         }

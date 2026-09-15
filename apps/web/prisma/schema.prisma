@@ -106,6 +106,7 @@ model User {
   name         String
   passwordHash String    @map("password_hash")
   role         UserRole  @default(VIEWER)
+  permissions  String[]  @default([]) // Secciones que puede ver: "dashboard", "buses", "drivers", etc.
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 

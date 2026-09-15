@@ -11,22 +11,28 @@ interface Settings {
   logoSize: number | null;
 }
 
-const navigation = [
-  { name: "Panel Principal", href: "/", icon: "📊" },
-  { name: "Buses", href: "/buses", icon: "🚌" },
-  { name: "Conductores", href: "/drivers", icon: "👤" },
-  { name: "Rutas", href: "/routes", icon: "🗺️" },
-  { name: "Viajes", href: "/trips", icon: "🗓️" },
-  { name: "Planificación", href: "/planning", icon: "📋" },
-  { name: "Contingencias", href: "/contingencies", icon: "🚨" },
-  { name: "Extraboard", href: "/extraboard", icon: "👥" },
-  { name: "Importar", href: "/import", icon: "📥" },
-  { name: "Reportes", href: "/reports", icon: "📊" },
-  { name: "Auditoría", href: "/audit", icon: "📝" },
-  { name: "Configuración", href: "/settings", icon: "⚙️" },
+interface SessionUser {
+  role?: string;
+  permissions?: string[];
+}
+
+const allNavigation = [
+  { name: "Panel Principal", href: "/", icon: "📊", section: "dashboard" },
+  { name: "Buses", href: "/buses", icon: "🚌", section: "buses" },
+  { name: "Conductores", href: "/drivers", icon: "👤", section: "drivers" },
+  { name: "Rutas", href: "/routes", icon: "🗺️", section: "routes" },
+  { name: "Viajes", href: "/trips", icon: "🗓️", section: "trips" },
+  { name: "Planificación", href: "/planning", icon: "📋", section: "planning" },
+  { name: "Contingencias", href: "/contingencies", icon: "🚨", section: "contingencies" },
+  { name: "Extraboard", href: "/extraboard", icon: "👥", section: "extraboard" },
+  { name: "Importar", href: "/import", icon: "📥", section: "import" },
+  { name: "Reportes", href: "/reports", icon: "📊", section: "reports" },
+  { name: "Auditoría", href: "/audit", icon: "📝", section: "audit" },
+  { name: "Configuración", href: "/settings", icon: "⚙️", section: "settings" },
+  { name: "Usuarios", href: "/users", icon: "👥", section: "users" },
 ];
 
-export default function Sidebar({ user }: { user: any }) {
+export default function Sidebar({ user }: { user: SessionUser & { name?: string; email?: string } }) {
   const pathname = usePathname();
   const [settings, setSettings] = useState<Settings>({ companyName: null, logoBase64: null, logoSize: 40 });
 
@@ -38,6 +44,16 @@ export default function Sidebar({ user }: { user: any }) {
   }, []);
 
   const logoSize = settings.logoSize || 40;
+  const isAdmin = user?.role === "ADMIN";
+  const permissions = user?.permissions || [];
+
+  // Filter navigation based on role and permissions
+  const navigation = allNavigation.filter((item) => {
+    // Admin sees everything
+    if (isAdmin) return true;
+    // Check if user has permission for this section
+    return permissions.includes(item.section);
+  });
 
   return (
     <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 hidden lg:block">
