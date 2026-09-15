@@ -21,12 +21,20 @@ export function AuditLogEntry({ log }: AuditColumnsProps) {
     STATUS_CHANGE: "bg-yellow-100 text-yellow-800",
   };
 
+  const actionLabels: Record<string, string> = {
+    CREATE: "Crear",
+    UPDATE: "Actualizar",
+    DELETE: "Eliminar",
+    ASSIGN: "Asignar",
+    STATUS_CHANGE: "Cambio de estado",
+  };
+
   return (
     <tr className="hover:bg-gray-50">
       <td className="px-4 py-3 text-sm text-gray-500">{formatDateTime(log.createdAt)}</td>
       <td className="px-4 py-3">
         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${actionColors[log.action] || "bg-gray-100 text-gray-800"}`}>
-          {log.action}
+          {actionLabels[log.action] || log.action}
         </span>
       </td>
       <td className="px-4 py-3 text-sm font-medium text-gray-900">{log.entityType}</td>

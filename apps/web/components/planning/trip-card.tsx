@@ -2,6 +2,17 @@ import { formatTime, formatDate } from "@/lib/utils";
 import { TRIP_STATUS_COLORS } from "@/lib/constants";
 import type { TripWithDetails } from "@/types";
 
+const etiquetas: Record<string, string> = {
+  SCHEDULED: "Programado",
+  CONFIRMED: "Confirmado",
+  IN_PROGRESS: "En Progreso",
+  COMPLETED: "Completado",
+  CANCELLED: "Cancelado",
+  RESCHEDULED: "Reprogramado",
+  CONTINGENCY_AFFECTED: "Afectado Contingencia",
+  PENDING_REPLACEMENT: "Pendiente Reemplazo",
+};
+
 interface TripCardProps {
   trip: TripWithDetails;
   onClick?: () => void;
@@ -20,7 +31,7 @@ export function TripCard({ trip, onClick }: TripCardProps) {
       <div className="flex items-center justify-between mb-1">
         <span className="text-xs font-mono text-gray-500">{formatTime(trip.departureTime)}</span>
         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${TRIP_STATUS_COLORS[trip.status] || "bg-gray-100 text-gray-800"}`}>
-          {trip.status}
+          {etiquetas[trip.status] || trip.status}
         </span>
       </div>
       <p className="text-sm font-medium text-gray-900">

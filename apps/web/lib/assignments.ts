@@ -44,17 +44,17 @@ export async function validateAssignment(params: {
     return { valid: false, errors: [{ field: "bus", message: "Bus no encontrado", code: "NOT_FOUND" }], warnings: [] };
   }
 
-  // 1. Driver active
+  // 1. Conductor activo
   if (driver.status !== "ACTIVE") {
     errors.push({ field: "driver", message: "Conductor no está activo", code: "DRIVER_INACTIVE" });
   }
 
-  // 2. Bus available
+  // 2. Bus disponible
   if (bus.status !== "AVAILABLE") {
     errors.push({ field: "bus", message: "Bus no está disponible", code: "BUS_UNAVAILABLE" });
   }
 
-  // 3. Qualifications
+  // 3. Habilitaciones
   if (trip.tripType === "INTERNATIONAL" && !driver.canInternational) {
     errors.push({ field: "driver", message: "Conductor no habilitado para servicio internacional", code: "NOT_QUALIFIED" });
   }
@@ -63,7 +63,7 @@ export async function validateAssignment(params: {
     errors.push({ field: "driver", message: "Conductor no habilitado para servicio nacional", code: "NOT_QUALIFIED" });
   }
 
-  // 4. Vacation check
+  // 4. Verificación de vacaciones
   const tripDate = new Date(trip.scheduledDate);
   const onVacation = driver.vacations.some((v) => {
     const start = new Date(v.startDate);
@@ -75,7 +75,7 @@ export async function validateAssignment(params: {
     errors.push({ field: "driver", message: "Conductor tiene vacaciones programadas para esta fecha", code: "ON_VACATION" });
   }
 
-  // 5. Red day check
+  // 5. Verificación de día rojo
   const isRedDay = driver.redDays.some((rd) => {
     const rdDate = new Date(rd.date);
     return (
@@ -89,12 +89,12 @@ export async function validateAssignment(params: {
     errors.push({ field: "driver", message: "Conductor tiene día rojo en esta fecha", code: "RED_DAY" });
   }
 
-  // 6. Restricted routes
+  // 6. Rutas restringidas
   if (driver.restrictions?.restrictedRoutes.includes(trip.route.destination)) {
     errors.push({ field: "driver", message: `Conductor restringido para destino: ${trip.route.destination}`, code: "RESTRICTED_ROUTE" });
   }
 
-  // 7. Time conflict - driver
+  // 7. Conflicto de horario - conductor
   const departureTime = new Date(trip.departureTime);
   const arrivalTime = trip.arrivalTime ? new Date(trip.arrivalTime) : new Date(departureTime.getTime() + trip.route.estimatedDuration * 60000);
 
@@ -125,7 +125,7 @@ export async function validateAssignment(params: {
     }
   }
 
-  // 8. Time conflict - bus
+  // 8. Conflicto de horario - bus
   const conflictingBusAssignment = await prisma.tripAssignment.findFirst({
     where: {
       busId: params.busId,
@@ -153,7 +153,7 @@ export async function validateAssignment(params: {
     }
   }
 
-  // 9. Rest period
+  // 9. Período de descanso
   if (driver.restrictions) {
     const lastAssignment = await prisma.tripAssignment.findFirst({
       where: {
@@ -184,7 +184,7 @@ export async function validateAssignment(params: {
     }
   }
 
-  // 10. Warnings
+  // 10. Advertencias
   if (driver.status === "ACTIVE" && !onVacation && !isRedDay) {
     const weeklyAssignments = await prisma.tripAssignment.count({
       where: {

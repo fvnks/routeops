@@ -22,7 +22,7 @@ export async function GET() {
     const json = await res.json();
     const feature = json.features?.[0]?.attributes;
 
-    if (!feature) throw new Error("Feature not found");
+    if (!feature) throw new Error("Elemento no encontrado");
 
     const transitabilidad = feature.TRANSITABILIDAD || "SIN INFORMACIÓN";
     const isOpen = transitabilidad.includes("SIN RESTRICCIÓN");
@@ -58,7 +58,7 @@ export async function GET() {
     cache = { data, ts: Date.now() };
     return NextResponse.json(data);
   } catch (error: any) {
-    // Return last cached data if available, even if stale
+    // Retornar datos en caché si están disponibles, aunque estén desactualizados
     if (cache) return NextResponse.json(cache.data);
 
     return NextResponse.json({

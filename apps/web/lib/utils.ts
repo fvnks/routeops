@@ -30,7 +30,7 @@ export function formatDateTime(date: Date | string): string {
 export function generateTripNumber(date: Date, seq: number): string {
   const dateStr = format(date, "yyyy-MM-dd");
   const seqStr = String(seq).padStart(3, "0");
-  return `TRIP-${dateStr}-${seqStr}`;
+  return `VIAJE-${dateStr}-${seqStr}`;
 }
 
 export function getDateRange(from: Date, days: number): Date[] {

@@ -28,6 +28,6 @@ export async function logAudit(params: AuditParams): Promise<void> {
       },
     });
   } catch (error) {
-    console.error("Audit log error:", error);
+    console.error("Error en registro de auditoría:", error);
   }
 }

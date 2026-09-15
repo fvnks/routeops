@@ -4,9 +4,9 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding database...");
+  console.log("🌱 Sembrando base de datos...");
 
-  // Create admin user
+  // Crear usuario administrador
   const passwordHash = await bcrypt.hash("admin123", 10);
   await prisma.user.upsert({
     where: { email: "admin@routeops.com" },
@@ -18,9 +18,9 @@ async function main() {
       role: "ADMIN",
     },
   });
-  console.log("✅ User admin@routeops.com created");
+  console.log("✅ Usuario admin@routeops.com creado");
 
-  // Create drivers
+  // Crear conductores
   const driverData = [
     { firstName: "Juan", lastName: "Pérez", licenseNumber: "CH-001", baseLocation: "Santiago", canNational: true, canInternational: true },
     { firstName: "Carlos", lastName: "Soto", licenseNumber: "CH-002", baseLocation: "Santiago", canNational: true, canInternational: true },
@@ -84,9 +84,9 @@ async function main() {
       },
     });
   }
-  console.log(`✅ ${driverData.length} drivers created`);
+  console.log(`✅ ${driverData.length} conductores creados`);
 
-  // Create buses
+  // Crear buses
   const busData = [
     { plateNumber: "ABCD-12", internalCode: "B-001", brand: "Mercedes-Benz", model: "O500", capacity: 50, busType: "standard" },
     { plateNumber: "EFGH-34", internalCode: "B-002", brand: "Mercedes-Benz", model: "O500", capacity: 50, busType: "standard" },
@@ -139,9 +139,9 @@ async function main() {
       },
     });
   }
-  console.log(`✅ ${busData.length} buses created`);
+  console.log(`✅ ${busData.length} buses creados`);
 
-  // Create routes
+  // Crear rutas
   const routeData = [
     { name: "San Felipe → Santiago", code: "SFE-SCL", type: "NATIONAL", origin: "San Felipe", destination: "Santiago", estimatedDuration: 120, distanceKm: 180 },
     { name: "Santiago → San Felipe", code: "SCL-SFE", type: "NATIONAL", origin: "Santiago", destination: "San Felipe", estimatedDuration: 120, distanceKm: 180 },
@@ -168,9 +168,9 @@ async function main() {
       },
     });
   }
-  console.log(`✅ ${routeData.length} routes created`);
+  console.log(`✅ ${routeData.length} rutas creadas`);
 
-  // Create sample trips for today and next 6 days
+  // Crear viajes de ejemplo para hoy y los próximos 6 días
   const routes = await prisma.route.findMany();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -190,7 +190,7 @@ async function main() {
 
       const arrivalTime = new Date(departureTime.getTime() + route.estimatedDuration * 60000);
 
-      const tripNumber = `TRIP-${date.toISOString().split("T")[0]}-${String(tripCount + 1).padStart(3, "0")}`;
+      const tripNumber = `VIAJE-${date.toISOString().split("T")[0]}-${String(tripCount + 1).padStart(3, "0")}`;
 
       await prisma.trip.upsert({
         where: { scheduledDate_tripNumber: { scheduledDate: date, tripNumber } },
@@ -208,9 +208,9 @@ async function main() {
       tripCount++;
     }
   }
-  console.log(`✅ ${tripCount} trips created for 7 days`);
+  console.log(`✅ ${tripCount} viajes creados para 7 días`);
 
-  console.log("🎉 Seeding complete!");
+  console.log("🎉 ¡Siembra completada!");
 }
 
 main()

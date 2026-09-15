@@ -10,7 +10,7 @@ export function UserNav() {
       {session?.user && (
         <div className="text-right">
           <p className="text-sm font-medium text-gray-900">{session.user.name || session.user.email}</p>
-          <p className="text-xs text-gray-500">{(session.user as any).role || "user"}</p>
+          <p className="text-xs text-gray-500">{(session.user as any).role || "usuario"}</p>
         </div>
       )}
       <button

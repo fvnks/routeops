@@ -47,9 +47,20 @@ export function BusStatusBadge({ status }: { status: string }) {
 }
 
 export function TripStatusBadge({ status }: { status: TripStatus }) {
+  const etiquetas: Record<string, string> = {
+    SCHEDULED: "Programado",
+    CONFIRMED: "Confirmado",
+    IN_PROGRESS: "En Progreso",
+    COMPLETED: "Completado",
+    CANCELLED: "Cancelado",
+    RESCHEDULED: "Reprogramado",
+    CONTINGENCY_AFFECTED: "Afectado Contingencia",
+    PENDING_REPLACEMENT: "Pendiente Reemplazo",
+  };
+
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${TRIP_STATUS_COLORS[status] || "bg-gray-100 text-gray-800"}`}>
-      {status.replace("_", " ")}
+      {etiquetas[status] || status}
     </span>
   );
 }

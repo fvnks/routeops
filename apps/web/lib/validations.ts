@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// ─── DRIVERS ───────────────────────────────────────────
+// ─── CONDUCTORES ──────────────────────────────────────
 
 export const createDriverSchema = z.object({
   firstName: z.string().min(1, "Nombre requerido"),
@@ -18,7 +18,7 @@ export const createDriverSchema = z.object({
 
 export const updateDriverSchema = createDriverSchema.partial();
 
-// ─── BUSES ─────────────────────────────────────────────
+// ─── BUSES ────────────────────────────────────────────
 
 export const createBusSchema = z.object({
   plateNumber: z.string().min(1, "Patente requerida"),
@@ -34,7 +34,7 @@ export const createBusSchema = z.object({
 
 export const updateBusSchema = createBusSchema.partial();
 
-// ─── ROUTES ────────────────────────────────────────────
+// ─── RUTAS ────────────────────────────────────────────
 
 export const createRouteSchema = z.object({
   name: z.string().min(1, "Nombre requerido"),
@@ -50,7 +50,7 @@ export const createRouteSchema = z.object({
 
 export const updateRouteSchema = createRouteSchema.partial();
 
-// ─── TRIPS ─────────────────────────────────────────────
+// ─── VIAJES ───────────────────────────────────────────
 
 export const createTripSchema = z.object({
   routeId: z.string().min(1, "Ruta requerida"),
@@ -85,7 +85,7 @@ export const assignTripSchema = z.object({
   busId: z.string().min(1, "Bus requerido"),
 });
 
-// ─── VACATIONS ─────────────────────────────────────────
+// ─── VACACIONES ───────────────────────────────────────
 
 export const createVacationSchema = z.object({
   startDate: z.string().transform((s) => new Date(s)),
@@ -93,7 +93,7 @@ export const createVacationSchema = z.object({
   reason: z.string().optional(),
 });
 
-// ─── MAINTENANCE ───────────────────────────────────────
+// ─── MANTENCIÓN ───────────────────────────────────────
 
 export const createMaintenanceSchema = z.object({
   type: z.enum(["PREVENTIVE", "CORRECTIVE", "EMERGENCY", "INSPECTION"]),
