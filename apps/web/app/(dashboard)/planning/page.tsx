@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { PageHeader } from "@/components/shared/page-header";
 import { LoadingPage } from "@/components/shared/loading-spinner";
 import { WeekView } from "@/components/planning/week-view";
-import { TripCard } from "@/components/planning/trip-card";
-import { TripAssignDialog } from "@/components/trips/trip-assign-dialog";
-import { formatDate } from "@/lib/utils";
+import { PlanningToolbar } from "@/components/planning/planning-toolbar";
+import { AssignmentPanel } from "@/components/planning/assignment-panel";
 import type { DaySchedule, TripWithDetails } from "@/types";
 
 export default function PlanningPage() {
@@ -17,17 +16,26 @@ export default function PlanningPage() {
     d.setHours(0, 0, 0, 0);
     return d.toISOString().split("T")[0];
   });
-  const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
+  const [selectedTrip, setSelectedTrip] = useState<TripWithDetails | null>(null);
+  const [filter, setFilter] = useState<"all" | "unassigned" | "conflicts">("all");
+  const [isAssigning, setIsAssigning] = useState(false);
 
-  useEffect(() => { fetchPlanning(); }, [startDate]);
-
-  async function fetchPlanning() {
+  const fetchPlanning = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/planning?from=${startDate}`);
-    const d = await res.json();
-    setData(d);
-    setLoading(false);
-  }
+    try {
+      const res = await fetch(`/api/planning?from=${startDate}`);
+      const d = await res.json();
+      setData(d);
+    } catch (error) {
+      console.error("Error al cargar planificación:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [startDate]);
+
+  useEffect(() => {
+    fetchPlanning();
+  }, [fetchPlanning]);
 
   function navigateWeek(dir: number) {
     const d = new Date(startDate);
@@ -35,68 +43,103 @@ export default function PlanningPage() {
     setStartDate(d.toISOString().split("T")[0]);
   }
 
-  const dayNames = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+  function handleToday() {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    setStartDate(d.toISOString().split("T")[0]);
+  }
+
+  function handleTripClick(trip: TripWithDetails) {
+    setSelectedTrip(trip);
+  }
+
+  async function handleAssign(driverId: string, busId: string) {
+    if (!selectedTrip) return;
+    setIsAssigning(true);
+    try {
+      const res = await fetch("/api/trips", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tripId: selectedTrip.id,
+          driverId,
+          busId,
+        }),
+      });
+      if (res.ok) {
+        setSelectedTrip(null);
+        fetchPlanning();
+      }
+    } catch (error) {
+      console.error("Error al asignar:", error);
+    } finally {
+      setIsAssigning(false);
+    }
+  }
+
+  async function handleRemoveAssignment(assignmentId: string) {
+    try {
+      const res = await fetch(`/api/trips?id=${assignmentId}`, { method: "DELETE" });
+      if (res.ok) {
+        setSelectedTrip(null);
+        fetchPlanning();
+      }
+    } catch (error) {
+      console.error("Error al remover asignación:", error);
+    }
+  }
+
+  const stats = data
+    ? {
+        totalTrips: data.days.reduce((sum: number, d: any) => sum + d.stats.total, 0),
+        assigned: data.days.reduce((sum: number, d: any) => sum + d.stats.assigned, 0),
+        unassigned: data.days.reduce((sum: number, d: any) => sum + d.stats.unassigned, 0),
+        conflicts: data.days.reduce((sum: number, d: any) => sum + d.stats.conflicts, 0),
+      }
+    : undefined;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Planificación</h1>
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigateWeek(-1)} className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">← Anterior</button>
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-            className="px-3 py-1 border border-gray-300 rounded text-sm" />
-          <button onClick={() => { const d = new Date(); d.setHours(0,0,0,0); setStartDate(d.toISOString().split("T")[0]); }}
-            className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">Hoy</button>
-          <button onClick={() => navigateWeek(1)} className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">Siguiente →</button>
-        </div>
-      </div>
+      <PageHeader
+        title="Planificación Semanal"
+        subtitle="Organiza y asigna viajes para los próximos 7 días"
+      />
+
+      <PlanningToolbar
+        startDate={startDate}
+        onDateChange={setStartDate}
+        onNavigate={navigateWeek}
+        onToday={handleToday}
+        filter={filter}
+        onFilterChange={setFilter}
+        stats={stats}
+      />
 
       {loading ? (
         <LoadingPage />
       ) : !data ? (
         <div className="text-center py-12 text-gray-500">Error al cargar datos</div>
       ) : (
-        <div className="grid grid-cols-7 gap-2 min-h-[600px]">
-          {data.days.map((day: any) => {
-            const d = new Date(day.date + "T12:00:00");
-            return (
-              <div key={day.date} className="bg-white rounded-lg border border-gray-200 flex flex-col">
-                <div className="p-2 border-b border-gray-200 text-center">
-                  <p className="text-xs text-gray-500">{dayNames[d.getDay()]}</p>
-                  <p className="text-sm font-semibold text-gray-900">{d.getDate()}</p>
-                  <div className="flex justify-center gap-1 mt-1">
-                    <span className="text-xs text-gray-500">{day.stats.total}</span>
-                    {day.stats.unassigned > 0 && (
-                      <span className="text-xs text-red-500 font-medium">({day.stats.unassigned} sin asignar)</span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex-1 p-1 space-y-1 overflow-y-auto max-h-[500px]">
-                  {day.trips.map((trip: any) => {
-                    const hasAssignment = trip.assignments?.length > 0;
-                    const time = new Date(trip.departureTime).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
-                    return (
-                      <div key={trip.id} onClick={() => setSelectedTripId(trip.id)}
-                        className={`p-1.5 rounded text-xs cursor-pointer border transition-colors ${hasAssignment ? "bg-green-50 border-green-200 hover:bg-green-100" : "bg-orange-50 border-orange-200 hover:bg-orange-100"}`}>
-                        <p className="font-medium text-gray-900">{time}</p>
-                        <p className="text-gray-600 truncate">{trip.route?.origin}→{trip.route?.destination}</p>
-                        {hasAssignment ? (
-                          <p className="text-gray-500 truncate">{trip.assignments[0].driver?.firstName} {trip.assignments[0].driver?.lastName?.charAt(0)}.</p>
-                        ) : (
-                          <p className="text-orange-500 font-medium">Sin asignar</p>
-                        )}
-                        {hasAssignment && <p className="text-gray-400 truncate">{trip.assignments[0].bus?.plateNumber}</p>}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+        <div className="flex gap-4">
+          <div className="flex-1 min-w-0">
+            <WeekView days={data.days} onTripClick={handleTripClick} filter={filter} />
+          </div>
+
+          {selectedTrip && (
+            <div className="w-80 flex-shrink-0">
+              <AssignmentPanel
+                trip={selectedTrip}
+                drivers={data.drivers}
+                buses={data.buses}
+                onAssign={handleAssign}
+                onRemoveAssignment={handleRemoveAssignment}
+                onCancel={() => setSelectedTrip(null)}
+                isAssigning={isAssigning}
+              />
+            </div>
+          )}
         </div>
       )}
-
-      <TripAssignDialog tripId={selectedTripId} open={!!selectedTripId} onClose={() => setSelectedTripId(null)} onAssigned={fetchPlanning} />
     </div>
   );
 }

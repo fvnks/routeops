@@ -1,4 +1,6 @@
-import { formatTime, formatDate } from "@/lib/utils";
+"use client";
+
+import { formatTime } from "@/lib/utils";
 import { TRIP_STATUS_COLORS } from "@/lib/constants";
 import type { TripWithDetails } from "@/types";
 
@@ -20,30 +22,60 @@ interface TripCardProps {
 
 export function TripCard({ trip, onClick }: TripCardProps) {
   const hasAssignment = trip.assignments.length > 0;
+  const isInternational = trip.tripType === "INTERNATIONAL";
 
   return (
     <div
       onClick={onClick}
-      className={`p-3 rounded-lg border cursor-pointer hover:shadow-sm transition-shadow ${
-        hasAssignment ? "border-green-200 bg-green-50/50" : "border-orange-200 bg-orange-50/50"
+      className={`p-3 rounded-lg border cursor-pointer hover:shadow-sm transition-all ${
+        hasAssignment ? "border-green-200 bg-green-50/50 hover:border-green-300" : "border-orange-200 bg-orange-50/50 hover:border-orange-300"
       }`}
     >
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between mb-1.5">
         <span className="text-xs font-mono text-gray-500">{formatTime(trip.departureTime)}</span>
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${TRIP_STATUS_COLORS[trip.status] || "bg-gray-100 text-gray-800"}`}>
-          {etiquetas[trip.status] || trip.status}
-        </span>
+        <div className="flex items-center gap-1">
+          {isInternational && (
+            <span className="px-1.5 py-0.5 bg-purple-100 text-purple-700 text-[9px] font-medium rounded">
+              INTL
+            </span>
+          )}
+          <span
+            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${
+              TRIP_STATUS_COLORS[trip.status] || "bg-gray-100 text-gray-800"
+            }`}
+          >
+            {etiquetas[trip.status] || trip.status}
+          </span>
+        </div>
       </div>
+
       <p className="text-sm font-medium text-gray-900">
         {trip.route.origin} → {trip.route.destination}
       </p>
-      {hasAssignment ? (
-        <p className="text-xs text-gray-500 mt-1">
-          {trip.assignments[0].driver.firstName} {trip.assignments[0].driver.lastName} · {trip.assignments[0].bus.plateNumber}
-        </p>
-      ) : (
-        <p className="text-xs text-orange-600 mt-1 font-medium">Sin asignar</p>
-      )}
+
+      <div className="mt-2 flex items-center justify-between">
+        {hasAssignment ? (
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[9px] font-bold">
+                {trip.assignments[0].driver.firstName.charAt(0)}
+                {trip.assignments[0].driver.lastName.charAt(0)}
+              </span>
+              <span className="text-xs text-gray-600">
+                {trip.assignments[0].driver.firstName} {trip.assignments[0].driver.lastName}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <span className="text-xs text-orange-600 font-medium">Sin asignar</span>
+        )}
+
+        {hasAssignment && (
+          <span className="text-[10px] text-gray-400 font-mono">
+            {trip.assignments[0].bus.plateNumber}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
