@@ -62,6 +62,42 @@ enum AuditAction {
   IMPORT
 }
 
+enum ContingencyType {
+  DRIVER_ABSENCE
+  BUS_BREAKDOWN
+  ROUTE_DISRUPTION
+  DEMAND_SURGE
+}
+
+enum ContingencySeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum ContingencyStatus {
+  ACTIVE
+  IN_PROGRESS
+  RESOLVED
+  CANCELLED
+}
+
+enum ContingencyResolution {
+  REASSIGNED
+  CANCELLED
+  DELAYED
+  COVERED_EXTRABOARD
+  COVERED_OVERTIME
+}
+
+enum ExtraboardStatus {
+  AVAILABLE
+  ON_DUTY
+  EXHAUSTED
+  OFF_DUTY
+}
+
 // ─── MODELS ────────────────────────────────────────────
 
 model User {
@@ -102,6 +138,9 @@ model Driver {
   vacations    DriverVacation[]
   redDays      DriverRedDay[]
   assignments  TripAssignment[]
+  extraboard   ExtraboardDriver[]
+  affectedContingencies Contingency[] @relation("AffectedDriver")
+  replacedContingencies Contingency[] @relation("ReplacementDriver")
 
   @@index([status])
   @@index([baseLocation])
@@ -168,6 +207,8 @@ model Bus {
   maintenance  MaintenanceRecord[]
   assignments  TripAssignment[]
   reservations BusReservation[]
+  affectedContingencies Contingency[] @relation("AffectedBus")
+  replacedContingencies Contingency[] @relation("ReplacementBus")
 
   @@index([status])
   @@map("buses")
@@ -248,6 +289,7 @@ model Trip {
   updatedAt       DateTime   @updatedAt @map("updated_at")
 
   assignments TripAssignment[]
+  contingencies Contingency[]
 
   @@unique([scheduledDate, tripNumber])
   @@index([scheduledDate, status])
@@ -299,4 +341,78 @@ model AuditLog {
   @@index([userId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+model Contingency {
+  id                  String              @id @default(cuid())
+  type                ContingencyType
+  severity            ContingencySeverity @default(MEDIUM)
+  status              ContingencyStatus   @default(ACTIVE)
+
+  affectedDriverId    String?             @map("affected_driver_id")
+  affectedDriver      Driver?             @relation("AffectedDriver", fields: [affectedDriverId], references: [id], onDelete: SetNull)
+  affectedBusId       String?             @map("affected_bus_id")
+  affectedBus         Bus?                @relation("AffectedBus", fields: [affectedBusId], references: [id], onDelete: SetNull)
+  affectedTripId      String?             @map("affected_trip_id")
+  affectedTrip        Trip?               @relation(fields: [affectedTripId], references: [id], onDelete: SetNull)
+
+  reportedAt          DateTime            @default(now()) @map("reported_at")
+  reportedBy          String?             @map("reported_by")
+  reason              String?
+  estimatedResolution DateTime?           @map("estimated_resolution")
+
+  resolution          ContingencyResolution?
+  resolvedAt          DateTime?           @map("resolved_at")
+  resolutionNotes     String?             @map("resolution_notes")
+
+  replacementDriverId String?             @map("replacement_driver_id")
+  replacementDriver   Driver?             @relation("ReplacementDriver", fields: [replacementDriverId], references: [id], onDelete: SetNull)
+  replacementBusId    String?             @map("replacement_bus_id")
+  replacementBus      Bus?                @relation("ReplacementBus", fields: [replacementBusId], references: [id], onDelete: SetNull)
+
+  actions             ContingencyAction[]
+
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([type])
+  @@index([severity])
+  @@index([affectedTripId])
+  @@map("contingencies")
+}
+
+model ContingencyAction {
+  id              String    @id @default(cuid())
+  contingencyId   String    @map("contingency_id")
+  contingency     Contingency @relation(fields: [contingencyId], references: [id], onDelete: Cascade)
+
+  action          String
+  performedBy     String?   @map("performed_by")
+  details         Json?
+  notes           String?
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@index([contingencyId])
+  @@map("contingency_actions")
+}
+
+model ExtraboardDriver {
+  id          String         @id @default(cuid())
+  driverId    String         @map("driver_id")
+  driver      Driver         @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  date        DateTime       @db.Date
+  reportTime  String         @map("report_time")
+  shiftType   String         @default("STRAIGHT") @map("shift_type")
+  status      ExtraboardStatus @default(AVAILABLE)
+  assignedTrips String[]     @default([]) @map("assigned_trips")
+  maxHours    Int            @default(8) @map("max_hours")
+
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  @@unique([driverId, date, reportTime])
+  @@index([date, status])
+  @@map("extraboard_drivers")
 }
