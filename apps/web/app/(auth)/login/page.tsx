@@ -45,7 +45,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo / Brand */}
         <div className="text-center mb-8">
@@ -56,20 +56,20 @@ export default function LoginPage() {
                 alt="Logo"
                 className="w-20 h-20 object-contain mb-4 rounded-xl"
               />
-              <h1 className="text-2xl font-bold text-white">
+              <h1 className="text-2xl font-bold text-gray-900">
                 {settings.companyName || "RouteOps"}
               </h1>
-              <p className="text-slate-400 text-sm mt-1">Sistema de Gestión Operativa</p>
+              <p className="text-gray-500 text-sm mt-1">Sistema de Gestión Operativa</p>
             </div>
           ) : (
             <div className="flex flex-col items-center">
-              <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mb-4">
-                <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-20 h-20 rounded-2xl bg-slate-200 flex items-center justify-center mb-4">
+                <svg className="w-10 h-10 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-white">RouteOps</h1>
-              <p className="text-slate-400 text-sm mt-1">Sistema de Gestión Operativa</p>
+              <h1 className="text-2xl font-bold text-gray-900">RouteOps</h1>
+              <p className="text-gray-500 text-sm mt-1">Sistema de Gestión Operativa</p>
             </div>
           )}
         </div>
