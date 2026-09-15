@@ -32,11 +32,12 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
+RUN npx prisma@5.22.0 db push --schema=./prisma/schema.prisma --accept-data-loss 2>&1 || true
 
 RUN chown -R nextjs:nodejs /app
-
-# Run prisma db push as root before switching user
-RUN npx prisma@5.22.0 db push --schema=./prisma/schema.prisma --accept-data-loss 2>&1 || true
 
 USER nextjs
 
