@@ -1,25 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+const DEFAULT_SETTINGS = {
+  id: "singleton",
+  companyName: null as string | null,
+  logoBase64: null as string | null,
+  logoSize: 40,
+  faviconUrl: null as string | null,
+  primaryColor: "#0f172a",
+};
+
 export async function GET() {
   try {
-    let settings = await prisma.settings.findUnique({
-      where: { id: "singleton" },
-    });
-
-    if (!settings) {
-      settings = await prisma.settings.create({
-        data: { id: "singleton" },
-      });
-    }
-
-    return NextResponse.json(settings);
+    const settings = await prisma.settings.findFirst();
+    return NextResponse.json(settings || DEFAULT_SETTINGS);
   } catch (error) {
-    console.error("Error al obtener settings:", error);
-    return NextResponse.json(
-      { error: "Error al obtener configuración" },
-      { status: 500 }
-    );
+    // Table might not exist yet - return defaults
+    return NextResponse.json(DEFAULT_SETTINGS);
   }
 }
 
@@ -28,23 +25,32 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const { companyName, logoBase64, logoSize, faviconUrl, primaryColor } = body;
 
-    // Ensure settings exist
-    await prisma.settings.upsert({
-      where: { id: "singleton" },
-      create: { id: "singleton" },
-      update: {},
-    });
+    // Try to find existing settings
+    let settings = await prisma.settings.findFirst();
 
-    const settings = await prisma.settings.update({
-      where: { id: "singleton" },
-      data: {
-        ...(companyName !== undefined && { companyName }),
-        ...(logoBase64 !== undefined && { logoBase64 }),
-        ...(logoSize !== undefined && { logoSize }),
-        ...(faviconUrl !== undefined && { faviconUrl }),
-        ...(primaryColor !== undefined && { primaryColor }),
-      },
-    });
+    if (settings) {
+      settings = await prisma.settings.update({
+        where: { id: settings.id },
+        data: {
+          ...(companyName !== undefined && { companyName }),
+          ...(logoBase64 !== undefined && { logoBase64 }),
+          ...(logoSize !== undefined && { logoSize }),
+          ...(faviconUrl !== undefined && { faviconUrl }),
+          ...(primaryColor !== undefined && { primaryColor }),
+        },
+      });
+    } else {
+      settings = await prisma.settings.create({
+        data: {
+          id: "singleton",
+          companyName: companyName || null,
+          logoBase64: logoBase64 || null,
+          logoSize: logoSize || 40,
+          faviconUrl: faviconUrl || null,
+          primaryColor: primaryColor || "#0f172a",
+        },
+      });
+    }
 
     return NextResponse.json(settings);
   } catch (error) {
@@ -58,17 +64,19 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE() {
   try {
-    await prisma.settings.update({
-      where: { id: "singleton" },
-      data: {
-        companyName: null,
-        logoBase64: null,
-        logoSize: 40,
-        faviconUrl: null,
-        primaryColor: "#0f172a",
-      },
-    });
-
+    const settings = await prisma.settings.findFirst();
+    if (settings) {
+      await prisma.settings.update({
+        where: { id: settings.id },
+        data: {
+          companyName: null,
+          logoBase64: null,
+          logoSize: 40,
+          faviconUrl: null,
+          primaryColor: "#0f172a",
+        },
+      });
+    }
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error al resetear settings:", error);
