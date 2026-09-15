@@ -58,7 +58,7 @@ export function BorderStatusWidget({ compact = false }: { compact?: boolean }) {
     fetchStatus();
     fetchWeather();
     const interval = setInterval(fetchStatus, 10 * 60 * 1000);
-    const weatherInterval = setInterval(fetchWeather, 6 * 60 * 60 * 1000);
+    const weatherInterval = setInterval(fetchWeather, 2 * 60 * 60 * 1000);
     return () => { clearInterval(interval); clearInterval(weatherInterval); };
   }, []);
 

@@ -17,7 +17,7 @@ interface HourlyWeather {
 }
 
 let cache: { data: any; ts: number } | null = null;
-const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 horas
+const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 horas
 
 function evaluateRisk(hour: HourlyWeather): { level: "low" | "medium" | "high" | "critical"; reasons: string[] } {
   const reasons: string[] = [];
