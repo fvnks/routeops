@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 
 interface TripAssignDialogProps {
-  tripId: string;
+  tripId: string | null;
   open: boolean;
   onClose: () => void;
   onAssigned: () => void;

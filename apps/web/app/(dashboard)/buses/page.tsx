@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { PageHeader } from "@/components/shared/page-header";
+import { SearchInput } from "@/components/shared/search-input";
+import { LoadingRow } from "@/components/shared/loading-spinner";
+import { EmptyState } from "@/components/shared/empty-state";
+import { BusStatusBadge } from "@/components/shared/status-badges";
 
 export default function BusesPage() {
   const [buses, setBuses] = useState<any[]>([]);
@@ -22,35 +27,14 @@ export default function BusesPage() {
     setLoading(false);
   }
 
-  const statusColors: Record<string, string> = {
-    AVAILABLE: "bg-green-100 text-green-800",
-    IN_MAINTENANCE: "bg-yellow-100 text-yellow-800",
-    RETIRED: "bg-gray-100 text-gray-800",
-    RESERVED: "bg-blue-100 text-blue-800",
-  };
-
-  const statusLabels: Record<string, string> = {
-    AVAILABLE: "Disponible",
-    IN_MAINTENANCE: "Mantención",
-    RETIRED: "Retirado",
-    RESERVED: "Reservado",
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Buses</h1>
-          <p className="text-gray-500">{buses.length} buses registrados</p>
-        </div>
-        <Link href="/buses/new" className="bg-slate-900 text-white px-4 py-2 rounded-md hover:bg-slate-800 transition-colors text-sm font-medium">
-          + Nuevo Bus
-        </Link>
-      </div>
+      <PageHeader title="Buses" subtitle={`${buses.length} buses registrados`} action={{ label: "+ Nuevo Bus", href: "/buses/new" }} />
 
       <div className="flex gap-4">
-        <input type="text" placeholder="Buscar por patente, código o modelo..." value={search} onChange={(e) => setSearch(e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500" />
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md">
+        <SearchInput value={search} onChange={setSearch} placeholder="Buscar por patente, código o modelo..." className="flex-1" />
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-md text-sm">
           <option value="">Todos</option>
           <option value="AVAILABLE">Disponible</option>
           <option value="IN_MAINTENANCE">Mantención</option>
@@ -65,7 +49,6 @@ export default function BusesPage() {
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patente</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marca/Modelo</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Capacidad</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
@@ -73,22 +56,17 @@ export default function BusesPage() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {loading ? (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">Cargando...</td></tr>
+              <LoadingRow colSpan={6} />
             ) : buses.length === 0 ? (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">No hay buses registrados</td></tr>
+              <tr><td colSpan={6}><EmptyState title="No hay buses" action={{ label: "Crear bus", href: "/buses/new" }} /></td></tr>
             ) : (
               buses.map((bus) => (
                 <tr key={bus.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm font-medium text-gray-900">{bus.internalCode || "—"}</td>
                   <td className="px-4 py-3 text-sm text-gray-600 font-mono">{bus.plateNumber}</td>
                   <td className="px-4 py-3 text-sm text-gray-600">{bus.brand} {bus.model}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600 capitalize">{bus.busType}</td>
                   <td className="px-4 py-3 text-sm text-gray-600">{bus.capacity}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[bus.status] || ""}`}>
-                      {statusLabels[bus.status] || bus.status}
-                    </span>
-                  </td>
+                  <td className="px-4 py-3"><BusStatusBadge status={bus.status} /></td>
                   <td className="px-4 py-3 text-right">
                     <Link href={`/buses/${bus.id}`} className="text-slate-600 hover:text-slate-900 text-sm font-medium">Editar</Link>
                   </td>

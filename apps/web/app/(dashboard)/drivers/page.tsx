@@ -2,63 +2,48 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { PageHeader } from "@/components/shared/page-header";
+import { SearchInput } from "@/components/shared/search-input";
+import { LoadingRow, LoadingPage } from "@/components/shared/loading-spinner";
+import { EmptyState } from "@/components/shared/empty-state";
+import { DriverStatusBadge } from "@/components/shared/status-badges";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 export default function DriversPage() {
   const [drivers, setDrivers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchDrivers();
-  }, [search, statusFilter]);
+  useEffect(() => { fetchDrivers(); }, [search, statusFilter]);
 
   async function fetchDrivers() {
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set("search", search);
     if (statusFilter) params.set("status", statusFilter);
-
     const res = await fetch(`/api/drivers?${params}`);
     const data = await res.json();
     setDrivers(data.data || []);
     setLoading(false);
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("¿Estás seguro de desactivar este conductor?")) return;
-    await fetch(`/api/drivers/${id}`, { method: "DELETE" });
+  async function handleDelete() {
+    if (!deleteId) return;
+    await fetch(`/api/drivers/${deleteId}`, { method: "DELETE" });
+    setDeleteId(null);
     fetchDrivers();
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Conductores</h1>
-          <p className="text-gray-500">{drivers.length} conductores registrados</p>
-        </div>
-        <Link
-          href="/drivers/new"
-          className="bg-slate-900 text-white px-4 py-2 rounded-md hover:bg-slate-800 transition-colors text-sm font-medium"
-        >
-          + Nuevo Conductor
-        </Link>
-      </div>
+      <PageHeader title="Conductores" subtitle={`${drivers.length} conductores registrados`} action={{ label: "+ Nuevo Conductor", href: "/drivers/new" }} />
 
       <div className="flex gap-4">
-        <input
-          type="text"
-          placeholder="Buscar por nombre o licencia..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500"
-        />
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500"
-        >
+        <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre o licencia..." className="flex-1" />
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500">
           <option value="">Todos los estados</option>
           <option value="ACTIVE">Activo</option>
           <option value="INACTIVE">Inactivo</option>
@@ -81,59 +66,31 @@ export default function DriversPage() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {loading ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">Cargando...</td>
-              </tr>
+              <LoadingRow colSpan={7} />
             ) : drivers.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">No hay conductores registrados</td>
-              </tr>
+              <tr><td colSpan={7}><EmptyState title="No hay conductores" action={{ label: "Crear conductor", href: "/drivers/new" }} /></td></tr>
             ) : (
               drivers.map((driver) => (
                 <tr key={driver.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
-                    <div>
-                      <p className="font-medium text-gray-900">{driver.firstName} {driver.lastName}</p>
-                      <p className="text-sm text-gray-500">{driver.email}</p>
-                    </div>
+                    <p className="font-medium text-gray-900">{driver.firstName} {driver.lastName}</p>
+                    <p className="text-sm text-gray-500">{driver.email}</p>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600">{driver.licenseNumber}</td>
                   <td className="px-4 py-3 text-sm text-gray-600">{driver.baseLocation}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
-                      {driver.canNational && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">NAC</span>
-                      )}
-                      {driver.canInternational && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">INT</span>
-                      )}
+                      {driver.canNational && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">NAC</span>}
+                      {driver.canInternational && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">INT</span>}
                     </div>
                   </td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      driver.status === "ACTIVE" ? "bg-green-100 text-green-800" :
-                      driver.status === "INACTIVE" ? "bg-gray-100 text-gray-800" :
-                      "bg-red-100 text-red-800"
-                    }`}>
-                      {driver.status === "ACTIVE" ? "Activo" : driver.status === "INACTIVE" ? "Inactivo" : "Suspendido"}
-                    </span>
-                  </td>
+                  <td className="px-4 py-3"><DriverStatusBadge status={driver.status} /></td>
                   <td className="px-4 py-3 text-sm text-gray-600">{driver._count?.assignments || 0}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-2">
-                      <Link
-                        href={`/drivers/${driver.id}`}
-                        className="text-slate-600 hover:text-slate-900 text-sm font-medium"
-                      >
-                        Editar
-                      </Link>
+                      <Link href={`/drivers/${driver.id}`} className="text-slate-600 hover:text-slate-900 text-sm font-medium">Editar</Link>
                       {driver.status === "ACTIVE" && (
-                        <button
-                          onClick={() => handleDelete(driver.id)}
-                          className="text-red-600 hover:text-red-900 text-sm font-medium"
-                        >
-                          Desactivar
-                        </button>
+                        <button onClick={() => setDeleteId(driver.id)} className="text-red-600 hover:text-red-900 text-sm font-medium">Desactivar</button>
                       )}
                     </div>
                   </td>
@@ -143,6 +100,8 @@ export default function DriversPage() {
           </tbody>
         </table>
       </div>
+
+      <ConfirmDialog open={!!deleteId} title="Desactivar conductor" message="¿Estás seguro de desactivar este conductor? No podrá ser asignado a viajes." variant="danger" confirmLabel="Desactivar" onConfirm={handleDelete} onCancel={() => setDeleteId(null)} />
     </div>
   );
 }
