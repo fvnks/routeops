@@ -7,7 +7,8 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 interface User {
   id: string;
-  email: string;
+  username: string;
+  email: string | null;
   name: string;
   role: string;
   permissions: string[];
@@ -45,8 +46,9 @@ export default function UsersPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   // Form state
-  const [formEmail, setFormEmail] = useState("");
+  const [formUsername, setFormUsername] = useState("");
   const [formName, setFormName] = useState("");
+  const [formEmail, setFormEmail] = useState("");
   const [formPassword, setFormPassword] = useState("");
   const [formRole, setFormRole] = useState("VIEWER");
   const [formPermissions, setFormPermissions] = useState<string[]>([]);
@@ -67,8 +69,9 @@ export default function UsersPage() {
 
   function openCreate() {
     setEditingUser(null);
-    setFormEmail("");
+    setFormUsername("");
     setFormName("");
+    setFormEmail("");
     setFormPassword("");
     setFormRole("VIEWER");
     setFormPermissions([]);
@@ -78,8 +81,9 @@ export default function UsersPage() {
 
   function openEdit(user: User) {
     setEditingUser(user);
-    setFormEmail(user.email);
+    setFormUsername(user.username);
     setFormName(user.name);
+    setFormEmail(user.email || "");
     setFormPassword("");
     setFormRole(user.role);
     setFormPermissions([...user.permissions]);
@@ -109,8 +113,9 @@ export default function UsersPage() {
 
     try {
       const body: any = {
-        email: formEmail,
+        username: formUsername,
         name: formName,
+        email: formEmail || null,
         role: formRole,
         permissions: formPermissions,
       };
@@ -182,7 +187,7 @@ export default function UsersPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuario</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Permisos</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Creado</th>
@@ -193,7 +198,7 @@ export default function UsersPage() {
               {users.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm font-medium text-gray-900">{user.name}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
+                  <td className="px-4 py-3 text-sm text-gray-600 font-mono">{user.username}</td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                       user.role === "ADMIN" ? "bg-purple-100 text-purple-700" :
@@ -254,7 +259,7 @@ export default function UsersPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
                   <input
                     type="text"
                     value={formName}
@@ -264,15 +269,26 @@ export default function UsersPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de usuario</label>
                   <input
-                    type="email"
-                    value={formEmail}
-                    onChange={(e) => setFormEmail(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    placeholder="juan@empresa.com"
+                    type="text"
+                    value={formUsername}
+                    onChange={(e) => setFormUsername(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono"
+                    placeholder="juan123"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email (opcional)</label>
+                <input
+                  type="email"
+                  value={formEmail}
+                  onChange={(e) => setFormEmail(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  placeholder="juan@empresa.com"
+                />
               </div>
 
               <div>

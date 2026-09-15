@@ -9,16 +9,17 @@ async function main() {
   // Crear usuario administrador
   const passwordHash = await bcrypt.hash("admin123", 10);
   await prisma.user.upsert({
-    where: { email: "admin@routeops.com" },
+    where: { username: "admin" },
     update: {},
     create: {
-      email: "admin@routeops.com",
+      username: "admin",
       name: "Administrador",
       passwordHash,
       role: "ADMIN",
+      permissions: [],
     },
   });
-  console.log("✅ Usuario admin@routeops.com creado");
+  console.log("✅ Usuario admin creado (admin / admin123)");
 
   // Crear conductores
   const driverData = [

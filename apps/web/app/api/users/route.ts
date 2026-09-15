@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
     const users = await prisma.user.findMany({
       select: {
         id: true,
+        username: true,
         email: true,
         name: true,
         role: true,
@@ -29,23 +30,23 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, name, password, role, permissions } = body;
+    const { username, email, name, password, role, permissions } = body;
 
-    if (!email || !name || !password) {
+    if (!username || !name || !password) {
       return NextResponse.json(
-        { error: "Faltan campos requeridos (email, name, password)" },
+        { error: "Faltan campos requeridos (username, name, password)" },
         { status: 400 }
       );
     }
 
-    // Check if email already exists
+    // Check if username already exists
     const existing = await prisma.user.findUnique({
-      where: { email },
+      where: { username },
     });
 
     if (existing) {
       return NextResponse.json(
-        { error: "El email ya está registrado" },
+        { error: "El nombre de usuario ya está en uso" },
         { status: 400 }
       );
     }
@@ -54,7 +55,8 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.create({
       data: {
-        email,
+        username,
+        email: email || null,
         name,
         passwordHash,
         role: role || "VIEWER",
@@ -62,6 +64,7 @@ export async function POST(request: NextRequest) {
       },
       select: {
         id: true,
+        username: true,
         email: true,
         name: true,
         role: true,
@@ -83,7 +86,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, email, name, password, role, permissions } = body;
+    const { id, username, email, name, password, role, permissions } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -94,7 +97,8 @@ export async function PATCH(request: NextRequest) {
 
     const updateData: any = {};
 
-    if (email) updateData.email = email;
+    if (username) updateData.username = username;
+    if (email !== undefined) updateData.email = email || null;
     if (name) updateData.name = name;
     if (role) updateData.role = role;
     if (permissions !== undefined) updateData.permissions = permissions;
@@ -105,6 +109,7 @@ export async function PATCH(request: NextRequest) {
       data: updateData,
       select: {
         id: true,
+        username: true,
         email: true,
         name: true,
         role: true,
@@ -132,15 +137,6 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json(
         { error: "Falta el id del usuario" },
         { status: 400 }
-      );
-    }
-
-    // Don't allow deleting yourself
-    const user = await prisma.user.findUnique({ where: { id } });
-    if (!user) {
-      return NextResponse.json(
-        { error: "Usuario no encontrado" },
-        { status: 404 }
       );
     }
 
