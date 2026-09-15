@@ -212,6 +212,7 @@ Historial de cambios en el sistema:
 | `/api/available-resources` | GET | Recursos disponibles para un viaje (filtra conflictos) |
 | `/api/border-status` | GET | Estado del Paso Los Libertadores (MOP Chile) |
 | `/api/notifications` | GET/POST/PATCH/DELETE | CRUD de notificaciones |
+| `/api/settings` | GET/PATCH/DELETE | Configuración de la empresa |
 | `/api/import` | POST | Parsear archivo Excel |
 | `/api/import/confirm` | POST | Confirmar importación a base de datos |
 
@@ -239,6 +240,22 @@ Valida si un conductor y bus pueden ser asignados a un viaje:
 
 ---
 
+### 12. Configuración (`/settings`)
+**Archivos:** `app/(dashboard)/settings/page.tsx`, `app/api/settings/route.ts`
+
+Personalización de la aplicación:
+- **Logo de empresa**: Subir imagen (PNG/JPG/SVG, máximo 2MB)
+  - Se muestra en el sidebar junto al nombre
+  - Se usa en el splash screen de carga
+- **Nombre de empresa**: Aparece en sidebar y splash
+- **Color principal**: Selector de color para theming
+- **Splash screen**: Se muestra al cargar la app (una vez por sesión)
+  - Muestra logo + nombre de empresa
+  - Spinner de carga
+  - Fade out automático después de 2 segundos
+
+---
+
 ## Modelos de Base de Datos
 
 **Archivo:** `prisma/schema.prisma`
@@ -260,6 +277,7 @@ Valida si un conductor y bus pueden ser asignados a un viaje:
 - **ContingencyAction**: Acciones tomadas para resolver
 - **ExtraboardDriver**: Conductores de refuerzo
 - **Notification**: Notificaciones in-app
+- **Settings**: Configuración de la empresa (logo, nombre, color)
 
 ---
 
