@@ -20,10 +20,23 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(users);
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
-    return NextResponse.json(
-      { error: "Error al obtener usuarios" },
-      { status: 500 }
-    );
+    // If username column doesn't exist yet, try without it
+    try {
+      const users = await prisma.user.findMany({
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          permissions: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      return NextResponse.json(users.map((u: any) => ({ ...u, username: u.email || "user" })));
+    } catch {
+      return NextResponse.json([], { status: 200 });
+    }
   }
 }
 

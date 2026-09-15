@@ -103,12 +103,12 @@ enum ExtraboardStatus {
 
 model User {
   id           String    @id @default(cuid())
-  username     String    @unique
+  username     String?   @unique
   email        String?
   name         String
   passwordHash String    @map("password_hash")
   role         UserRole  @default(VIEWER)
-  permissions  String[]  @default([]) // Secciones que puede ver: "dashboard", "buses", "drivers", etc.
+  permissions  String[]  @default([])
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
