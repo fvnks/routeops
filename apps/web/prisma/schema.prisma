@@ -439,3 +439,14 @@ model Notification {
   @@index([createdAt])
   @@map("notifications")
 }
+
+model Settings {
+  id            String   @id @default("singleton")
+  companyName   String?  @map("company_name")
+  logoBase64    String?  @db.Text @map("logo_base64")
+  faviconUrl    String?  @map("favicon_url")
+  primaryColor  String?  @default("#0f172a") @map("primary_color")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
