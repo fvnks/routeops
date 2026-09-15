@@ -1,5 +1,6 @@
 "use client";
 
+import { useDraggable } from "@dnd-kit/core";
 import { formatTime } from "@/lib/utils";
 import { TRIP_STATUS_COLORS } from "@/lib/constants";
 import type { TripWithDetails } from "@/types";
@@ -21,13 +22,31 @@ interface TripCardProps {
 }
 
 export function TripCard({ trip, onClick }: TripCardProps) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: trip.id,
+    data: { trip },
+  });
+
   const hasAssignment = trip.assignments.length > 0;
   const isInternational = trip.tripType === "INTERNATIONAL";
 
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        zIndex: 50,
+      }
+    : undefined;
+
   return (
     <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
       onClick={onClick}
-      className={`p-3 rounded-lg border cursor-pointer hover:shadow-sm transition-all ${
+      className={`p-3 rounded-lg border cursor-grab active:cursor-grabbing hover:shadow-sm transition-all ${
+        isDragging ? "opacity-50 shadow-lg" : ""
+      } ${
         hasAssignment ? "border-green-200 bg-green-50/50 hover:border-green-300" : "border-orange-200 bg-orange-50/50 hover:border-orange-300"
       }`}
     >

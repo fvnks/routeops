@@ -101,3 +101,51 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json(trip, { status: 201 });
 }
+
+export async function PATCH(request: NextRequest) {
+  const body = await request.json();
+  const { tripId, newDate } = body;
+
+  if (!tripId || !newDate) {
+    return NextResponse.json({ error: "Faltan tripId o newDate" }, { status: 400 });
+  }
+
+  const trip = await prisma.trip.findUnique({
+    where: { id: tripId },
+    include: { route: true },
+  });
+
+  if (!trip) {
+    return NextResponse.json({ error: "Viaje no encontrado" }, { status: 404 });
+  }
+
+  // Parse new date and preserve departure time
+  const oldDeparture = new Date(trip.departureTime);
+  const newDateObj = new Date(newDate + "T12:00:00");
+  
+  // Keep same time, change date
+  const newDeparture = new Date(newDateObj);
+  newDeparture.setHours(oldDeparture.getHours(), oldDeparture.getMinutes(), 0, 0);
+
+  const newArrival = new Date(newDeparture.getTime() + trip.route.estimatedDuration * 60000);
+
+  const updated = await prisma.trip.update({
+    where: { id: tripId },
+    data: {
+      scheduledDate: newDateObj,
+      departureTime: newDeparture,
+      arrivalTime: newArrival,
+    },
+    include: { route: true },
+  });
+
+  await logAudit({
+    entityType: "trip",
+    entityId: tripId,
+    action: "UPDATE",
+    oldValues: { scheduledDate: trip.scheduledDate, departureTime: trip.departureTime },
+    newValues: { scheduledDate: newDateObj, departureTime: newDeparture },
+  });
+
+  return NextResponse.json(updated);
+}

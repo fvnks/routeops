@@ -1,5 +1,6 @@
 "use client";
 
+import { useDroppable } from "@dnd-kit/core";
 import { TripCard } from "./trip-card";
 import { ConflictIndicator } from "./conflict-indicator";
 import type { DaySchedule, TripWithDetails } from "@/types";
@@ -15,6 +16,11 @@ interface DayColumnProps {
 export function DayColumn({ day, isToday = false, onTripClick }: DayColumnProps) {
   const d = new Date(day.date + "T12:00:00");
   const dayName = dayNamesShort[d.getDay()];
+
+  const { isOver, setNodeRef } = useDroppable({
+    id: day.date,
+    data: { date: day.date },
+  });
 
   return (
     <div className="min-h-[500px]">
@@ -64,12 +70,22 @@ export function DayColumn({ day, isToday = false, onTripClick }: DayColumnProps)
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div
+        ref={setNodeRef}
+        className={`space-y-2 min-h-[100px] rounded-lg transition-colors ${
+          isOver ? "bg-blue-50 ring-2 ring-blue-300" : ""
+        }`}
+      >
         {day.trips.map((trip) => (
           <TripCard key={trip.id} trip={trip} onClick={() => onTripClick?.(trip)} />
         ))}
-        {day.trips.length === 0 && (
+        {day.trips.length === 0 && !isOver && (
           <p className="text-xs text-gray-400 text-center py-6">Sin viajes</p>
+        )}
+        {isOver && (
+          <p className="text-xs text-blue-500 text-center py-2 font-medium">
+            Soltar aquí
+          </p>
         )}
       </div>
     </div>

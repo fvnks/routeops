@@ -89,6 +89,21 @@ export default function PlanningPage() {
     }
   }
 
+  async function handleMoveTrip(tripId: string, newDate: string) {
+    try {
+      const res = await fetch("/api/trips", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tripId, newDate }),
+      });
+      if (res.ok) {
+        fetchPlanning();
+      }
+    } catch (error) {
+      console.error("Error al mover viaje:", error);
+    }
+  }
+
   const stats = data
     ? {
         totalTrips: data.days.reduce((sum: number, d: any) => sum + d.stats.total, 0),
@@ -122,7 +137,7 @@ export default function PlanningPage() {
       ) : (
         <div className="flex gap-4">
           <div className="flex-1 min-w-0">
-            <WeekView days={data.days} onTripClick={handleTripClick} filter={filter} />
+            <WeekView days={data.days} onTripClick={handleTripClick} filter={filter} onMoveTrip={handleMoveTrip} />
           </div>
 
           {selectedTrip && (
