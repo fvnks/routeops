@@ -20,17 +20,46 @@ interface BorderStatus {
   error?: string;
 }
 
+interface WeatherForecast {
+  current: { temp: number; feelsLike: number; weather: string; icon: string; wind: number; humidity: number } | null;
+  forecast: {
+    time: string;
+    temp: number;
+    weather: string;
+    icon: string;
+    wind: number;
+    precipitation: number;
+    snow: number;
+    risk: { level: string; reasons: string[] };
+  }[];
+  risk: { level: string; reasons: string[] };
+  alert: string | null;
+  lastUpdate: string | null;
+}
+
+const riskConfig: Record<string, { bg: string; text: string; label: string; border: string }> = {
+  low:      { bg: "bg-green-50",  text: "text-green-800",  label: "Bajo",    border: "border-green-200" },
+  medium:   { bg: "bg-yellow-50", text: "text-yellow-800", label: "Medio",   border: "border-yellow-200" },
+  high:     { bg: "bg-orange-50", text: "text-orange-800", label: "Alto",    border: "border-orange-200" },
+  critical: { bg: "bg-red-50",    text: "text-red-800",    label: "Crítico", border: "border-red-200" },
+  unknown:  { bg: "bg-gray-50",   text: "text-gray-600",   label: "N/D",     border: "border-gray-200" },
+};
+
 export function BorderStatusWidget({ compact = false }: { compact?: boolean }) {
   const [status, setStatus] = useState<BorderStatus | null>(null);
+  const [weather, setWeather] = useState<WeatherForecast | null>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showWeather, setShowWeather] = useState(false);
   const previousStatus = useRef<string | null>(null);
   const isFirstLoad = useRef(true);
 
   useEffect(() => {
     fetchStatus();
+    fetchWeather();
     const interval = setInterval(fetchStatus, 10 * 60 * 1000);
-    return () => clearInterval(interval);
+    const weatherInterval = setInterval(fetchWeather, 6 * 60 * 60 * 1000);
+    return () => { clearInterval(interval); clearInterval(weatherInterval); };
   }, []);
 
   async function fetchStatus() {
@@ -67,6 +96,16 @@ export function BorderStatusWidget({ compact = false }: { compact?: boolean }) {
     setLoading(false);
   }
 
+  async function fetchWeather() {
+    try {
+      const res = await fetch("/api/weather");
+      const data = await res.json();
+      setWeather(data);
+    } catch {
+      // silent
+    }
+  }
+
   const s = status;
 
   const colorMap: Record<string, { bg: string; text: string; dot: string; border: string }> = {
@@ -92,6 +131,11 @@ export function BorderStatusWidget({ compact = false }: { compact?: boolean }) {
           {s?.restricciones && (
             <span className="text-xs text-orange-600 truncate max-w-[150px]">
               · {s.restricciones}
+            </span>
+          )}
+          {weather?.risk && weather.risk.level !== "low" && weather.risk.level !== "unknown" && (
+            <span className={`text-[10px] px-1.5 py-0.5 rounded ${riskConfig[weather.risk.level]?.bg || ""} ${riskConfig[weather.risk.level]?.text || ""}`}>
+              Clima: {riskConfig[weather.risk.level]?.label}
             </span>
           )}
         </button>
@@ -161,6 +205,91 @@ export function BorderStatusWidget({ compact = false }: { compact?: boolean }) {
           {s?.lastUpdate ? `Actualizado: ${new Date(s.lastUpdate).toLocaleString("es-CL")}` : ""}
           {" · "}Fuente: MOP Chile
         </p>
+
+        {/* Pronóstico del tiempo */}
+        {weather && weather.current && (
+          <div className="mt-3 pt-3 border-t border-gray-200/50">
+            <button
+              onClick={() => setShowWeather(!showWeather)}
+              className="flex items-center justify-between w-full text-left"
+            >
+              <span className="text-xs font-semibold text-gray-700">Pronóstico 24h</span>
+              <div className="flex items-center gap-2">
+                {weather.risk && weather.risk.level !== "low" && weather.risk.level !== "unknown" && (
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${riskConfig[weather.risk.level]?.bg} ${riskConfig[weather.risk.level]?.text}`}>
+                    Riesgo: {riskConfig[weather.risk.level]?.label}
+                  </span>
+                )}
+                <span className="text-gray-400 text-xs">{showWeather ? "▲" : "▼"}</span>
+              </div>
+            </button>
+
+            {showWeather && (
+              <div className="mt-2 space-y-2">
+                {/* Clima actual */}
+                <div className="flex items-center gap-3 p-2 bg-white/60 rounded">
+                  <img
+                    src={`https://openweathermap.org/img/wn/${weather.current.icon}@2x.png`}
+                    alt=""
+                    className="w-10 h-10"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{weather.current.temp}°C</p>
+                    <p className="text-xs text-gray-500">{weather.current.weather} · Viento {weather.current.wind} km/h</p>
+                  </div>
+                </div>
+
+                {/* Alerta de nieve */}
+                {weather.alert && (
+                  <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 font-medium">
+                    ❄️ {weather.alert}
+                  </div>
+                )}
+
+                {/* Riesgo y razones */}
+                {weather.risk && weather.risk.reasons.length > 0 && (
+                  <div className={`p-2 rounded text-xs ${riskConfig[weather.risk.level]?.bg} ${riskConfig[weather.risk.level]?.text}`}>
+                    <p className="font-semibold mb-1">Factores de riesgo:</p>
+                    <ul className="list-disc list-inside space-y-0.5">
+                      {weather.risk.reasons.map((r, i) => (
+                        <li key={i}>{r}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Pronóstico por horas */}
+                {weather.forecast.length > 0 && (
+                  <div className="grid grid-cols-4 gap-1">
+                    {weather.forecast.map((f, i) => (
+                      <div key={i} className="text-center p-1.5 bg-white/60 rounded">
+                        <p className="text-[10px] text-gray-500">
+                          {new Date(f.time).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                        <img
+                          src={`https://openweathermap.org/img/wn/${f.icon}.png`}
+                          alt=""
+                          className="w-8 h-8 mx-auto"
+                        />
+                        <p className="text-xs font-medium text-gray-900">{f.temp}°</p>
+                        {f.precipitation > 0 && (
+                          <p className="text-[10px] text-blue-600">{f.precipitation}%</p>
+                        )}
+                        {f.snow > 0 && (
+                          <p className="text-[10px] text-blue-700">❄️{f.snow}mm</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <p className="text-[10px] text-gray-400">
+                  Fuente: OpenWeatherMap · {weather.lastUpdate ? new Date(weather.lastUpdate).toLocaleString("es-CL") : ""}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <BorderReassignModal
