@@ -23,6 +23,7 @@ interface DataTableProps<T> {
   emptyTitle?: string;
   emptyDescription?: string;
   emptyAction?: { label: string; href: string };
+  meta?: Record<string, any>;
 }
 
 export function DataTable<T>({
@@ -36,6 +37,7 @@ export function DataTable<T>({
   emptyTitle = "Sin resultados",
   emptyDescription,
   emptyAction,
+  meta,
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -46,6 +48,7 @@ export function DataTable<T>({
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
+    meta,
   });
 
   return (

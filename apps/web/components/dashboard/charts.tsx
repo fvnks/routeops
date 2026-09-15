@@ -12,6 +12,7 @@ import {
   ArcElement,
 } from "chart.js";
 import { Bar, Doughnut } from "react-chartjs-2";
+import { STATUS_LABELS, STATUS_COLORS } from "@/lib/constants";
 
 ChartJS.register(
   CategoryScale,
@@ -54,25 +55,21 @@ export function DashboardCharts() {
       const drivers = driversData.data || [];
       const buses = busesData.data || [];
 
-      // Count trips by status
       const tripsByStatus: Record<string, number> = {};
       trips.forEach((t: any) => {
         tripsByStatus[t.status] = (tripsByStatus[t.status] || 0) + 1;
       });
 
-      // Count trips by type
       const tripsByType: Record<string, number> = {};
       trips.forEach((t: any) => {
         tripsByType[t.tripType] = (tripsByType[t.tripType] || 0) + 1;
       });
 
-      // Count drivers by status
       const driversByStatus: Record<string, number> = {};
       drivers.forEach((d: any) => {
         driversByStatus[d.status] = (driversByStatus[d.status] || 0) + 1;
       });
 
-      // Count buses by status
       const busesByStatus: Record<string, number> = {};
       buses.forEach((b: any) => {
         busesByStatus[b.status] = (busesByStatus[b.status] || 0) + 1;
@@ -101,51 +98,18 @@ export function DashboardCharts() {
     );
   }
 
-  const statusColors: Record<string, string> = {
-    SCHEDULED: "#FCD34D",
-    CONFIRMED: "#34D399",
-    IN_PROGRESS: "#60A5FA",
-    COMPLETED: "#9CA3AF",
-    CANCELLED: "#F87171",
-    ACTIVE: "#34D399",
-    INACTIVE: "#9CA3AF",
-    SUSPENDED: "#F87171",
-    AVAILABLE: "#34D399",
-    IN_MAINTENANCE: "#FCD34D",
-    RETIRED: "#9CA3AF",
-  };
-
-  const statusLabels: Record<string, string> = {
-    SCHEDULED: "Programado",
-    CONFIRMED: "Confirmado",
-    IN_PROGRESS: "En Progreso",
-    COMPLETED: "Completado",
-    CANCELLED: "Cancelado",
-    ACTIVE: "Activo",
-    INACTIVE: "Inactivo",
-    SUSPENDED: "Suspendido",
-    AVAILABLE: "Disponible",
-    IN_MAINTENANCE: "Mantenimiento",
-    RETIRED: "Retirado",
-  };
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Trips by Status */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-sm font-semibold text-gray-900 mb-4">Viajes por Estado</h3>
         <div className="h-48">
           <Bar
             data={{
-              labels: Object.keys(data.tripsByStatus).map(
-                (k) => statusLabels[k] || k
-              ),
+              labels: Object.keys(data.tripsByStatus).map((k) => STATUS_LABELS[k] || k),
               datasets: [
                 {
                   data: Object.values(data.tripsByStatus),
-                  backgroundColor: Object.keys(data.tripsByStatus).map(
-                    (k) => statusColors[k] || "#9CA3AF"
-                  ),
+                  backgroundColor: Object.keys(data.tripsByStatus).map((k) => STATUS_COLORS[k] || "#9CA3AF"),
                   borderRadius: 4,
                 },
               ],
@@ -162,7 +126,6 @@ export function DashboardCharts() {
         </div>
       </div>
 
-      {/* Trips by Type */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-sm font-semibold text-gray-900 mb-4">Viajes por Tipo</h3>
         <div className="h-48 flex items-center justify-center">
@@ -183,30 +146,23 @@ export function DashboardCharts() {
             options={{
               responsive: true,
               maintainAspectRatio: false,
-              plugins: {
-                legend: { position: "bottom" },
-              },
+              plugins: { legend: { position: "bottom" } },
               cutout: "60%",
             }}
           />
         </div>
       </div>
 
-      {/* Drivers by Status */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-sm font-semibold text-gray-900 mb-4">Conductores por Estado</h3>
         <div className="h-48 flex items-center justify-center">
           <Doughnut
             data={{
-              labels: Object.keys(data.driversByStatus).map(
-                (k) => statusLabels[k] || k
-              ),
+              labels: Object.keys(data.driversByStatus).map((k) => STATUS_LABELS[k] || k),
               datasets: [
                 {
                   data: Object.values(data.driversByStatus),
-                  backgroundColor: Object.keys(data.driversByStatus).map(
-                    (k) => statusColors[k] || "#9CA3AF"
-                  ),
+                  backgroundColor: Object.keys(data.driversByStatus).map((k) => STATUS_COLORS[k] || "#9CA3AF"),
                   borderWidth: 0,
                 },
               ],
@@ -214,30 +170,23 @@ export function DashboardCharts() {
             options={{
               responsive: true,
               maintainAspectRatio: false,
-              plugins: {
-                legend: { position: "bottom" },
-              },
+              plugins: { legend: { position: "bottom" } },
               cutout: "60%",
             }}
           />
         </div>
       </div>
 
-      {/* Buses by Status */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-sm font-semibold text-gray-900 mb-4">Buses por Estado</h3>
         <div className="h-48 flex items-center justify-center">
           <Doughnut
             data={{
-              labels: Object.keys(data.busesByStatus).map(
-                (k) => statusLabels[k] || k
-              ),
+              labels: Object.keys(data.busesByStatus).map((k) => STATUS_LABELS[k] || k),
               datasets: [
                 {
                   data: Object.values(data.busesByStatus),
-                  backgroundColor: Object.keys(data.busesByStatus).map(
-                    (k) => statusColors[k] || "#9CA3AF"
-                  ),
+                  backgroundColor: Object.keys(data.busesByStatus).map((k) => STATUS_COLORS[k] || "#9CA3AF"),
                   borderWidth: 0,
                 },
               ],
@@ -245,9 +194,7 @@ export function DashboardCharts() {
             options={{
               responsive: true,
               maintainAspectRatio: false,
-              plugins: {
-                legend: { position: "bottom" },
-              },
+              plugins: { legend: { position: "bottom" } },
               cutout: "60%",
             }}
           />

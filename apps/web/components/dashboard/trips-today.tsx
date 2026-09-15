@@ -1,17 +1,6 @@
 import { formatTime } from "@/lib/utils";
-import { TRIP_STATUS_COLORS } from "@/lib/constants";
+import { TRIP_STATUS_COLORS, STATUS_LABELS } from "@/lib/constants";
 import type { TripWithDetails } from "@/types";
-
-const etiquetas: Record<string, string> = {
-  SCHEDULED: "Programado",
-  CONFIRMED: "Confirmado",
-  IN_PROGRESS: "En Progreso",
-  COMPLETED: "Completado",
-  CANCELLED: "Cancelado",
-  RESCHEDULED: "Reprogramado",
-  CONTINGENCY_AFFECTED: "Afectado Contingencia",
-  PENDING_REPLACEMENT: "Pendiente Reemplazo",
-};
 
 interface TripsTodayProps {
   trips: TripWithDetails[];
@@ -41,7 +30,7 @@ export function TripsToday({ trips }: TripsTodayProps) {
                 </div>
               </div>
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${TRIP_STATUS_COLORS[trip.status] || "bg-gray-100 text-gray-800"}`}>
-                {etiquetas[trip.status] || trip.status}
+                {STATUS_LABELS[trip.status] || trip.status}
               </span>
             </div>
           ))}

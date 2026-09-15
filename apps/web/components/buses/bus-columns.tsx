@@ -79,15 +79,26 @@ export const busColumns: ColumnDef<BusRow>[] = [
   {
     id: "actions",
     header: () => <span className="text-right">Acciones</span>,
-    cell: ({ row }) => (
-      <div className="flex justify-end gap-2">
-        <Link
-          href={`/buses/${row.original.id}`}
-          className="text-slate-600 hover:text-slate-900 text-sm font-medium"
-        >
-          Editar
-        </Link>
-      </div>
-    ),
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as { onDelete?: (id: string) => void } | undefined;
+      return (
+        <div className="flex justify-end gap-2">
+          <Link
+            href={`/buses/${row.original.id}`}
+            className="text-slate-600 hover:text-slate-900 text-sm font-medium"
+          >
+            Editar
+          </Link>
+          {meta?.onDelete && (
+            <button
+              onClick={() => meta.onDelete!(row.original.id)}
+              className="text-red-500 hover:text-red-700 text-sm font-medium"
+            >
+              Eliminar
+            </button>
+          )}
+        </div>
+      );
+    },
   },
 ];

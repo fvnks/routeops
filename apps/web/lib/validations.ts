@@ -9,7 +9,7 @@ export const createDriverSchema = z.object({
   licenseExpiry: z.string().transform((s) => new Date(s)),
   phone: z.string().optional(),
   email: z.string().email().optional().or(z.literal("")),
-  baseLocation: z.string().default("Santiago"),
+  baseLocation: z.string(),
   canNational: z.boolean().default(true),
   canInternational: z.boolean().default(false),
   maxHoursPerWeek: z.number().int().min(1).max(60).default(45),

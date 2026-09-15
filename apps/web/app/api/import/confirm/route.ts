@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { DESTINATIONS } from "@/lib/constants";
 
 interface ImportRow {
   [key: string]: any;
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
               licenseNumber,
               email: row[headerMap["email"]] || null,
               phone: row[headerMap["phone"]] || null,
-              baseLocation: row[headerMap["baselocation"]] || "Santiago",
+              baseLocation: row[headerMap["baselocation"]] || DESTINATIONS[0],
               licenseExpiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
             },
           });
@@ -84,7 +85,7 @@ export async function POST(request: NextRequest) {
               model,
               year: row[headerMap["year"]] ? parseInt(row[headerMap["year"]]) : null,
               capacity: row[headerMap["capacity"]] ? parseInt(row[headerMap["capacity"]]) : 50,
-              busType: row[headerMap["bustype"]] || "NATIONAL",
+              busType: row[headerMap["bustype"]] || "standard",
             },
           });
           success++;

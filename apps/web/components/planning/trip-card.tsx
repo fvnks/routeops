@@ -2,19 +2,8 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import { formatTime } from "@/lib/utils";
-import { TRIP_STATUS_COLORS } from "@/lib/constants";
+import { TRIP_STATUS_COLORS, STATUS_LABELS } from "@/lib/constants";
 import type { TripWithDetails } from "@/types";
-
-const etiquetas: Record<string, string> = {
-  SCHEDULED: "Programado",
-  CONFIRMED: "Confirmado",
-  IN_PROGRESS: "En Progreso",
-  COMPLETED: "Completado",
-  CANCELLED: "Cancelado",
-  RESCHEDULED: "Reprogramado",
-  CONTINGENCY_AFFECTED: "Afectado Contingencia",
-  PENDING_REPLACEMENT: "Pendiente Reemplazo",
-};
 
 interface TripCardProps {
   trip: TripWithDetails;
@@ -63,7 +52,7 @@ export function TripCard({ trip, onClick }: TripCardProps) {
               TRIP_STATUS_COLORS[trip.status] || "bg-gray-100 text-gray-800"
             }`}
           >
-            {etiquetas[trip.status] || trip.status}
+            {STATUS_LABELS[trip.status] || trip.status}
           </span>
         </div>
       </div>

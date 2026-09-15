@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { DESTINATIONS, DRIVER_STATUSES } from "@/lib/constants";
 
 interface DriverFormProps {
   initial?: any;
@@ -18,7 +19,7 @@ export function DriverForm({ initial, onSubmit }: DriverFormProps) {
     phone: initial?.phone || "",
     licenseNumber: initial?.licenseNumber || "",
     licenseExpiry: initial?.licenseExpiry ? initial.licenseExpiry.split("T")[0] : "",
-    baseLocation: initial?.baseLocation || "San Felipe",
+    baseLocation: initial?.baseLocation || DESTINATIONS[0],
     canNational: initial?.canNational ?? true,
     canInternational: initial?.canInternational ?? false,
     status: initial?.status || "ACTIVE",
@@ -84,18 +85,18 @@ export function DriverForm({ initial, onSubmit }: DriverFormProps) {
             <label className="block text-sm font-medium text-gray-700 mb-1">Base *</label>
             <select value={form.baseLocation} onChange={(e) => set("baseLocation", e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500">
-              <option value="San Felipe">San Felipe</option>
-              <option value="Los Andes">Los Andes</option>
-              <option value="Santiago">Santiago</option>
+              {DESTINATIONS.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Estado *</label>
             <select value={form.status} onChange={(e) => set("status", e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500">
-              <option value="ACTIVE">Activo</option>
-              <option value="INACTIVE">Inactivo</option>
-              <option value="SUSPENDED">Suspendido</option>
+              {DRIVER_STATUSES.map((s) => (
+                <option key={s} value={s}>{s === "ACTIVE" ? "Activo" : s === "INACTIVE" ? "Inactivo" : "Suspendido"}</option>
+              ))}
             </select>
           </div>
           <div className="md:col-span-2 flex gap-6">

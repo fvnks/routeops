@@ -10,6 +10,7 @@ interface RouteTableProps {
   total?: number;
   limit?: number;
   onPageChange?: (page: number) => void;
+  onDelete?: (id: string) => void;
 }
 
 export function RouteTable({
@@ -19,6 +20,7 @@ export function RouteTable({
   total,
   limit,
   onPageChange,
+  onDelete,
 }: RouteTableProps) {
   return (
     <DataTable
@@ -32,6 +34,7 @@ export function RouteTable({
       emptyTitle="No hay rutas"
       emptyDescription="Comienza agregando una ruta al sistema"
       emptyAction={{ label: "Crear ruta", href: "/routes/new" }}
+      meta={{ onDelete }}
     />
   );
 }

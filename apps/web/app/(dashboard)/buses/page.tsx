@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/shared/page-header";
 import { BusTable } from "@/components/buses/bus-table";
 import { BusFilters } from "@/components/buses/bus-filters";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import type { BusRow } from "@/components/buses/bus-columns";
 
 export default function BusesPage() {
@@ -11,6 +12,7 @@ export default function BusesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchBuses();
@@ -25,6 +27,13 @@ export default function BusesPage() {
     const data = await res.json();
     setBuses(data.data || []);
     setLoading(false);
+  }
+
+  async function handleDelete() {
+    if (!deleteId) return;
+    await fetch(`/api/buses/${deleteId}`, { method: "DELETE" });
+    setDeleteId(null);
+    fetchBuses();
   }
 
   return (
@@ -42,7 +51,17 @@ export default function BusesPage() {
         onStatusFilterChange={setStatusFilter}
       />
 
-      <BusTable data={buses} loading={loading} />
+      <BusTable data={buses} loading={loading} onDelete={setDeleteId} />
+
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Eliminar bus"
+        message="¿Estás seguro de eliminar este bus? Esta acción no se puede deshacer."
+        variant="danger"
+        confirmLabel="Eliminar"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }

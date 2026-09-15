@@ -10,6 +10,7 @@ interface BusTableProps {
   total?: number;
   limit?: number;
   onPageChange?: (page: number) => void;
+  onDelete?: (id: string) => void;
 }
 
 export function BusTable({
@@ -19,6 +20,7 @@ export function BusTable({
   total,
   limit,
   onPageChange,
+  onDelete,
 }: BusTableProps) {
   return (
     <DataTable
@@ -32,6 +34,7 @@ export function BusTable({
       emptyTitle="No hay buses"
       emptyDescription="Comienza agregando un bus al sistema"
       emptyAction={{ label: "Crear bus", href: "/buses/new" }}
+      meta={{ onDelete }}
     />
   );
 }
