@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 interface Settings {
   companyName: string | null;
   logoBase64: string | null;
+  logoSize: number | null;
 }
 
 export default function LoginPage() {
@@ -15,7 +16,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [settings, setSettings] = useState<Settings>({ companyName: null, logoBase64: null });
+  const [settings, setSettings] = useState<Settings>({ companyName: null, logoBase64: null, logoSize: 40 });
 
   useEffect(() => {
     fetch("/api/settings")
@@ -54,7 +55,8 @@ export default function LoginPage() {
               <img
                 src={settings.logoBase64}
                 alt="Logo"
-                className="w-20 h-20 object-contain mb-4 rounded-xl"
+                className="object-contain mb-4 rounded-xl"
+                style={{ width: (settings.logoSize || 40) * 2, height: (settings.logoSize || 40) * 2 }}
               />
               <h1 className="text-2xl font-bold text-gray-900">
                 {settings.companyName || "RouteOps"}
@@ -63,7 +65,10 @@ export default function LoginPage() {
             </div>
           ) : (
             <div className="flex flex-col items-center">
-              <div className="w-20 h-20 rounded-2xl bg-slate-200 flex items-center justify-center mb-4">
+              <div
+                className="rounded-2xl bg-slate-200 flex items-center justify-center mb-4"
+                style={{ width: (settings.logoSize || 40) * 2, height: (settings.logoSize || 40) * 2 }}
+              >
                 <svg className="w-10 h-10 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                 </svg>
