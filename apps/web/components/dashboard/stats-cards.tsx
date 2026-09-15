@@ -1,5 +1,3 @@
-import { prisma } from "@/lib/prisma";
-
 interface StatsCardsProps {
   totalDrivers: number;
   activeDrivers: number;
