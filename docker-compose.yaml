@@ -12,7 +12,16 @@ services:
       AUTHENTIK_CLIENT_ID: '${AUTHENTIK_CLIENT_ID}'
       AUTHENTIK_CLIENT_SECRET: '${AUTHENTIK_CLIENT_SECRET}'
       AUTHENTIK_ISSUER: '${AUTHENTIK_ISSUER}'
+      SERVICE_FQDN_WEB: ucdo4mwynfkbirtyezl7w7t8.148.113.196.87.sslip.io
+      COOLIFY_FQDN: ucdo4mwynfkbirtyezl7w7t8.148.113.196.87.sslip.io
     restart: unless-stopped
+    container_name: web-fqabyjqnute4adpedwwnmxsl-224344133173
+    labels:
+      - coolify.managed=true
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      - traefik.http.routers.web.rule=Host(`ucdo4mwynfkbirtyezl7w7t8.148.113.196.87.sslip.io`)
+      - traefik.http.services.web.loadbalancer.server.port=3000
     networks:
       - coolify
 networks:
