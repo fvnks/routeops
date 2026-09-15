@@ -8,6 +8,7 @@ interface Settings {
   id: string;
   companyName: string | null;
   logoBase64: string | null;
+  logoSize: number | null;
   faviconUrl: string | null;
   primaryColor: string | null;
 }
@@ -18,6 +19,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#0f172a");
+  const [logoSize, setLogoSize] = useState(40);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -33,6 +35,7 @@ export default function SettingsPage() {
       setSettings(data);
       setCompanyName(data.companyName || "");
       setPrimaryColor(data.primaryColor || "#0f172a");
+      setLogoSize(data.logoSize || 40);
       setLogoPreview(data.logoBase64 || null);
     } catch (error) {
       console.error("Error al cargar settings:", error);
@@ -68,7 +71,6 @@ export default function SettingsPage() {
     try {
       let logoBase64 = logoPreview;
       if (logoFile) {
-        // Already set via preview
         logoBase64 = logoPreview;
       }
 
@@ -78,11 +80,11 @@ export default function SettingsPage() {
         body: JSON.stringify({
           companyName: companyName || null,
           logoBase64: logoBase64 || null,
+          logoSize,
           primaryColor,
         }),
       });
 
-      // Force page reload to update sidebar/logo
       window.location.reload();
     } catch (error) {
       console.error("Error al guardar:", error);
@@ -106,12 +108,16 @@ export default function SettingsPage() {
         <div className="flex items-start gap-6">
           {/* Logo Preview */}
           <div className="flex-shrink-0">
-            <div className="w-32 h-32 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50">
+            <div
+              className="rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50"
+              style={{ width: logoSize + 32, height: logoSize + 32 }}
+            >
               {logoPreview ? (
                 <img
                   src={logoPreview}
                   alt="Logo preview"
-                  className="w-full h-full object-contain"
+                  className="object-contain"
+                  style={{ width: logoSize, height: logoSize }}
                 />
               ) : (
                 <div className="text-center">
@@ -153,6 +159,48 @@ export default function SettingsPage() {
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Logo Size */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-sm font-semibold text-gray-900 mb-4">Tamaño del Logo (Sidebar)</h3>
+        <div className="flex items-center gap-4">
+          <input
+            type="range"
+            min="24"
+            max="80"
+            value={logoSize}
+            onChange={(e) => setLogoSize(parseInt(e.target.value))}
+            className="flex-1"
+          />
+          <span className="text-sm text-gray-600 w-12 text-right">{logoSize}px</span>
+        </div>
+        <div className="mt-3 flex gap-4">
+          <button
+            onClick={() => setLogoSize(24)}
+            className="text-xs text-gray-500 hover:text-gray-700"
+          >
+            Pequeño (24px)
+          </button>
+          <button
+            onClick={() => setLogoSize(40)}
+            className="text-xs text-gray-500 hover:text-gray-700"
+          >
+            Mediano (40px)
+          </button>
+          <button
+            onClick={() => setLogoSize(64)}
+            className="text-xs text-gray-500 hover:text-gray-700"
+          >
+            Grande (64px)
+          </button>
+          <button
+            onClick={() => setLogoSize(80)}
+            className="text-xs text-gray-500 hover:text-gray-700"
+          >
+            Extra Grande (80px)
+          </button>
         </div>
       </div>
 

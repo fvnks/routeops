@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 interface Settings {
   companyName: string | null;
   logoBase64: string | null;
+  logoSize: number | null;
 }
 
 const navigation = [
@@ -27,7 +28,7 @@ const navigation = [
 
 export default function Sidebar({ user }: { user: any }) {
   const pathname = usePathname();
-  const [settings, setSettings] = useState<Settings>({ companyName: null, logoBase64: null });
+  const [settings, setSettings] = useState<Settings>({ companyName: null, logoBase64: null, logoSize: 40 });
 
   useEffect(() => {
     fetch("/api/settings")
@@ -35,6 +36,8 @@ export default function Sidebar({ user }: { user: any }) {
       .then((data) => setSettings(data))
       .catch(() => {});
   }, []);
+
+  const logoSize = settings.logoSize || 40;
 
   return (
     <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 hidden lg:block">
@@ -46,7 +49,8 @@ export default function Sidebar({ user }: { user: any }) {
               <img
                 src={settings.logoBase64}
                 alt="Logo"
-                className="h-10 w-10 object-contain rounded"
+                className="object-contain rounded"
+                style={{ width: logoSize, height: logoSize }}
               />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-slate-900 truncate">

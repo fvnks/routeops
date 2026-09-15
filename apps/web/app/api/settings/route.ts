@@ -26,7 +26,7 @@ export async function GET() {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { companyName, logoBase64, faviconUrl, primaryColor } = body;
+    const { companyName, logoBase64, logoSize, faviconUrl, primaryColor } = body;
 
     // Ensure settings exist
     await prisma.settings.upsert({
@@ -40,6 +40,7 @@ export async function PATCH(request: NextRequest) {
       data: {
         ...(companyName !== undefined && { companyName }),
         ...(logoBase64 !== undefined && { logoBase64 }),
+        ...(logoSize !== undefined && { logoSize }),
         ...(faviconUrl !== undefined && { faviconUrl }),
         ...(primaryColor !== undefined && { primaryColor }),
       },
@@ -62,6 +63,7 @@ export async function DELETE() {
       data: {
         companyName: null,
         logoBase64: null,
+        logoSize: 40,
         faviconUrl: null,
         primaryColor: "#0f172a",
       },
