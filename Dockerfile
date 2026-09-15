@@ -35,8 +35,11 @@ COPY --from=deps /app/node_modules ./node_modules
 
 RUN chown -R nextjs:nodejs /app
 
+# Run prisma db push as root before switching user
+RUN npx prisma@5.22.0 db push --schema=./prisma/schema.prisma --accept-data-loss 2>&1 || true
+
 USER nextjs
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma@5.22.0 db push --schema=./prisma/schema.prisma 2>&1 || true && npx tsx prisma/seed.ts 2>&1 || true && exec node server.js"]
+CMD ["sh", "-c", "npx tsx prisma/seed.ts 2>&1 || true && exec node server.js"]
