@@ -190,6 +190,23 @@ Historial de cambios en el sistema:
 
 ---
 
+### 12. Usuarios (`/users`)
+**Archivos:** `app/(dashboard)/users/page.tsx`, `app/api/users/route.ts`
+
+Gestión de usuarios y permisos:
+- **Roles disponibles**:
+  - **ADMIN**: Acceso total a todas las secciones + gestión de usuarios
+  - **PLANNER**: Puede planificar y asignar viajes
+  - **OPERATOR**: Puede ver y gestionar operaciones
+  - **VIEWER**: Solo lectura
+- **Permisos por sección**: El admin puede asignar qué secciones ve cada usuario
+- **Sidebar filtrado**: Cada usuario solo ve las secciones que tiene permiso
+- **Crear usuario**: Nombre, email, contraseña, rol, permisos de secciones
+- **Editar usuario**: Cambiar datos, rol, permisos, contraseña (opcional)
+- **Eliminar usuario**: No se puede eliminar a uno mismo
+
+---
+
 ## APIs Principales
 
 | Ruta | Método | Descripción |
@@ -213,6 +230,7 @@ Historial de cambios en el sistema:
 | `/api/border-status` | GET | Estado del Paso Los Libertadores (MOP Chile) |
 | `/api/notifications` | GET/POST/PATCH/DELETE | CRUD de notificaciones |
 | `/api/settings` | GET/PATCH/DELETE | Configuración de la empresa |
+| `/api/users` | GET/POST/PATCH/DELETE | Gestión de usuarios y permisos |
 | `/api/import` | POST | Parsear archivo Excel |
 | `/api/import/confirm` | POST | Confirmar importación a base de datos |
 
