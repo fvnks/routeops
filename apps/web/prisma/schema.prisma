@@ -416,3 +416,26 @@ model ExtraboardDriver {
   @@index([date, status])
   @@map("extraboard_drivers")
 }
+
+enum NotificationType {
+  INFO
+  WARNING
+  SUCCESS
+  ERROR
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  type        NotificationType @default(INFO)
+  title       String
+  message     String
+  entity      String?
+  entityId    String?          @map("entity_id")
+  read        Boolean          @default(false)
+  actionUrl   String?          @map("action_url")
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  @@index([read])
+  @@index([createdAt])
+  @@map("notifications")
+}

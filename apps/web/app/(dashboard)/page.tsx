@@ -6,6 +6,7 @@ import { StatsCards } from "@/components/dashboard/stats-cards";
 import { TripsToday } from "@/components/dashboard/trips-today";
 import { UpcomingTrips } from "@/components/dashboard/upcoming-trips";
 import { BorderStatusWidget } from "@/components/dashboard/border-status";
+import { DashboardCharts } from "@/components/dashboard/charts";
 import { formatTime, formatDate } from "@/lib/utils";
 
 export default async function DashboardPage() {
@@ -68,6 +69,8 @@ export default async function DashboardPage() {
         <TripsToday trips={todayTripDetails as any} />
         <UpcomingTrips trips={upcomingTrips as any} />
       </div>
+
+      <DashboardCharts />
     </div>
   );
 }

@@ -20,7 +20,7 @@ interface BorderStatus {
   error?: string;
 }
 
-export function BorderStatusWidget() {
+export function BorderStatusWidget({ compact = false }: { compact?: boolean }) {
   const [status, setStatus] = useState<BorderStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -38,9 +38,7 @@ export function BorderStatusWidget() {
       const res = await fetch("/api/border-status");
       const data = await res.json();
 
-      // Detect status change (but not on first load)
       if (!isFirstLoad.current && previousStatus.current && previousStatus.current !== data.status) {
-        // Status changed - show modal if restricted or closed
         if (data.status === "restricted" || data.status === "closed") {
           setShowModal(true);
         }
@@ -79,6 +77,33 @@ export function BorderStatusWidget() {
   };
 
   const c = colorMap[s?.color || "gray"] || colorMap.gray;
+
+  if (compact) {
+    return (
+      <>
+        <button
+          onClick={() => setShowModal(true)}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ${c.bg} ${c.border} border transition-colors hover:opacity-80`}
+        >
+          <span className={`h-2 w-2 rounded-full ${c.dot} ${s?.status === "open" ? "animate-pulse" : ""}`} />
+          <span className={c.text}>
+            {loading ? "Consultando..." : s?.statusLabel || "—"}
+          </span>
+          {s?.restricciones && (
+            <span className="text-xs text-orange-600 truncate max-w-[150px]">
+              · {s.restricciones}
+            </span>
+          )}
+        </button>
+
+        <BorderReassignModal
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          borderStatus={s?.status || "unknown"}
+        />
+      </>
+    );
+  }
 
   return (
     <>

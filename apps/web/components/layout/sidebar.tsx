@@ -14,6 +14,7 @@ const navigation = [
   { name: "Contingencias", href: "/contingencies", icon: "🚨" },
   { name: "Extraboard", href: "/extraboard", icon: "👥" },
   { name: "Importar", href: "/import", icon: "📥" },
+  { name: "Reportes", href: "/reports", icon: "📊" },
   { name: "Auditoría", href: "/audit", icon: "📝" },
 ];
 
