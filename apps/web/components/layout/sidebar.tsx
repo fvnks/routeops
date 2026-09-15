@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: "📊" },
+  { name: "Dashboard", href: "/", icon: "📊" },
   { name: "Buses", href: "/buses", icon: "🚌" },
   { name: "Conductores", href: "/drivers", icon: "👤" },
   { name: "Rutas", href: "/routes", icon: "🗺️" },

@@ -27,7 +27,7 @@ export default function LoginPage() {
     if (result?.error) {
       setError("Email o contraseña incorrectos");
     } else {
-      router.push("/dashboard");
+      router.push("/");
     }
   }
 
@@ -36,7 +36,7 @@ export default function LoginPage() {
       <h2 className="text-2xl font-semibold text-center mb-6">Iniciar Sesión</h2>
 
       <button
-        onClick={() => signIn("authentik", { callbackUrl: "/dashboard" })}
+        onClick={() => signIn("authentik", { callbackUrl: "/" })}
         className="w-full flex items-center justify-center gap-3 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors mb-6"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
