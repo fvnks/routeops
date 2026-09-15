@@ -1,5 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
+interface AvailableDriver {
+  id: string;
+  firstName: string;
+  lastName: string;
+  baseLocation: string;
+  canInternational: boolean;
+}
+
+interface AvailableBus {
+  id: string;
+  plateNumber: string;
+  internalCode: string | null;
+  busType: string;
+  capacity: number;
+}
+
 interface AssignmentPanelProps {
   trip: {
     id: string;
@@ -23,20 +41,6 @@ interface AssignmentPanelProps {
       };
     }[];
   };
-  drivers: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    baseLocation: string;
-    canInternational: boolean;
-  }[];
-  buses: {
-    id: string;
-    plateNumber: string;
-    internalCode: string | null;
-    busType: string;
-    capacity: number;
-  }[];
   onAssign: (driverId: string, busId: string) => void;
   onRemoveAssignment: (assignmentId: string) => void;
   onCancel: () => void;
@@ -45,13 +49,32 @@ interface AssignmentPanelProps {
 
 export function AssignmentPanel({
   trip,
-  drivers,
-  buses,
   onAssign,
   onRemoveAssignment,
   onCancel,
   isAssigning,
 }: AssignmentPanelProps) {
+  const [availableDrivers, setAvailableDrivers] = useState<AvailableDriver[]>([]);
+  const [availableBuses, setAvailableBuses] = useState<AvailableBus[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAvailableResources();
+  }, [trip.id]);
+
+  async function fetchAvailableResources() {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/available-resources?tripId=${trip.id}`);
+      const data = await res.json();
+      setAvailableDrivers(data.drivers || []);
+      setAvailableBuses(data.buses || []);
+    } catch (error) {
+      console.error("Error al obtener recursos disponibles:", error);
+    }
+    setLoading(false);
+  }
+
   const hasAssignment = trip.assignments.length > 0;
 
   return (
@@ -95,41 +118,66 @@ export function AssignmentPanel({
         </div>
       ) : (
         <div className="space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Conductor</label>
-            <select id="driver-select" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-              <option value="">Seleccionar conductor...</option>
-              {drivers.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.firstName} {d.lastName} ({d.baseLocation})
-                </option>
-              ))}
-            </select>
-          </div>
+          {loading ? (
+            <div className="space-y-3">
+              <div className="animate-pulse space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                <div className="h-10 bg-gray-100 rounded"></div>
+              </div>
+              <div className="animate-pulse space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                <div className="h-10 bg-gray-100 rounded"></div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Conductor
+                  {availableDrivers.length === 0 && (
+                    <span className="text-red-500 ml-1">(ninguno disponible)</span>
+                  )}
+                </label>
+                <select id="driver-select" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                  <option value="">Seleccionar conductor...</option>
+                  {availableDrivers.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.firstName} {d.lastName} ({d.baseLocation})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Bus</label>
-            <select id="bus-select" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-              <option value="">Seleccionar bus...</option>
-              {buses.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.plateNumber} {b.internalCode ? `(${b.internalCode})` : ""} · {b.busType}
-                </option>
-              ))}
-            </select>
-          </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Bus
+                  {availableBuses.length === 0 && (
+                    <span className="text-red-500 ml-1">(ninguno disponible)</span>
+                  )}
+                </label>
+                <select id="bus-select" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                  <option value="">Seleccionar bus...</option>
+                  {availableBuses.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.plateNumber} {b.internalCode ? `(${b.internalCode})` : ""} · {b.busType}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          <button
-            onClick={() => {
-              const driverId = (document.getElementById("driver-select") as HTMLSelectElement)?.value;
-              const busId = (document.getElementById("bus-select") as HTMLSelectElement)?.value;
-              if (driverId && busId) onAssign(driverId, busId);
-            }}
-            disabled={isAssigning}
-            className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
-          >
-            {isAssigning ? "Asignando..." : "Asignar Viaje"}
-          </button>
+              <button
+                onClick={() => {
+                  const driverId = (document.getElementById("driver-select") as HTMLSelectElement)?.value;
+                  const busId = (document.getElementById("bus-select") as HTMLSelectElement)?.value;
+                  if (driverId && busId) onAssign(driverId, busId);
+                }}
+                disabled={isAssigning || availableDrivers.length === 0 || availableBuses.length === 0}
+                className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {isAssigning ? "Asignando..." : "Asignar Viaje"}
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

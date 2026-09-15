@@ -129,8 +129,6 @@ export default function PlanningPage() {
             <div className="w-80 flex-shrink-0">
               <AssignmentPanel
                 trip={selectedTrip}
-                drivers={data.drivers}
-                buses={data.buses}
                 onAssign={handleAssign}
                 onRemoveAssignment={handleRemoveAssignment}
                 onCancel={() => setSelectedTrip(null)}
