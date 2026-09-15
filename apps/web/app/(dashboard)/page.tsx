@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { TripsToday } from "@/components/dashboard/trips-today";
 import { UpcomingTrips } from "@/components/dashboard/upcoming-trips";
+import { BorderStatusWidget } from "@/components/dashboard/border-status";
 import { formatTime, formatDate } from "@/lib/utils";
 
 export default async function DashboardPage() {
@@ -61,9 +62,14 @@ export default async function DashboardPage() {
         assignedTrips={assignedTrips}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TripsToday trips={todayTripDetails as any} />
-        <UpcomingTrips trips={upcomingTrips as any} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <TripsToday trips={todayTripDetails as any} />
+        </div>
+        <div className="space-y-6">
+          <BorderStatusWidget />
+          <UpcomingTrips trips={upcomingTrips as any} />
+        </div>
       </div>
     </div>
   );
